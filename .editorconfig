@@ -1,0 +1,15 @@
+root = true
+
+[*]
+end_of_line = lf
+insert_final_newline = true
+charset = utf-8
+
+
+[*.{tsx,css,ts}]
+indent_style = tab
+tab_width = 2
+
+[*.{json,yml}]
+indent_style = space
+indent_size = 2
