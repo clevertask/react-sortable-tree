@@ -13,36 +13,36 @@
 	appearance: none;
 	background-color: transparent;
 	-webkit-tap-highlight-color: transparent;
+}
 
-	@media (hover: hover) {
-		&:hover {
-			background-color: var(--action-background, rgba(0, 0, 0, 0.05));
-
-			svg {
-				fill: #6f7b88;
-			}
-		}
+@media (hover: hover) {
+	.Action:hover {
+		background-color: var(--action-background, rgba(0, 0, 0, 0.05));
 	}
 
-	svg {
-		flex: 0 0 auto;
-		margin: auto;
-		height: 100%;
-		overflow: visible;
-		fill: #919eab;
+	.Action:hover svg {
+		fill: #6f7b88;
 	}
+}
 
-	&:active {
-		background-color: var(--background, rgba(0, 0, 0, 0.05));
+.Action svg {
+	flex: 0 0 auto;
+	margin: auto;
+	height: 100%;
+	overflow: visible;
+	fill: #919eab;
+}
 
-		svg {
-			fill: var(--fill, #788491);
-		}
-	}
+.Action:active {
+	background-color: var(--background, rgba(0, 0, 0, 0.05));
+}
 
-	&:focus-visible {
-		outline: none;
-		box-shadow: 0 0 0 2px rgba(255, 255, 255, 0),
-			0 0px 0px 2px #4c9ffe;
-	}
+.Action:active svg {
+	fill: var(--fill, #788491);
+}
+
+.Action:focus-visible {
+	outline: none;
+	box-shadow: 0 0 0 2px rgba(255, 255, 255, 0),
+		0 0px 0px 2px #4c9ffe;
 }
