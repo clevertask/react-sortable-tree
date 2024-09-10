@@ -12,7 +12,7 @@ interface Props extends TreeItemProps {
 
 const animateLayoutChanges: AnimateLayoutChanges = ({ isSorting, wasDragging }) => !(isSorting || wasDragging);
 
-function _SortableTreeItem({ id, depth, ...props }: Props) {
+function PrivateSortableTreeItem({ id, depth, ...props }: Props) {
   const {
     attributes,
     isDragging,
@@ -53,4 +53,4 @@ function _SortableTreeItem({ id, depth, ...props }: Props) {
   );
 }
 
-export const SortableTreeItem = memo(_SortableTreeItem);
+export const SortableTreeItem = memo(PrivateSortableTreeItem);
