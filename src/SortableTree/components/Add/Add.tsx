@@ -1,5 +1,3 @@
-import React from 'react';
-
 import {Action, ActionProps} from '../Action';
 
 export function Add(props: ActionProps) {

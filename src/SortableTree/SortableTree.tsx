@@ -1,4 +1,4 @@
-import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import {
   Announcements,
@@ -31,7 +31,7 @@ import {
   setTreeItemProperties,
   createOptimizedTreeStructure,
 } from "./utilities";
-import type { FlattenedItem, SensorContext, SortableTreeProps, TreeItem } from "./types";
+import type { DropResult, FlattenedItem, SensorContext, SortableTreeProps, TreeItem, TreeItems } from "./types";
 import { sortableTreeKeyboardCoordinates } from "./keyboardCoordinates";
 import { SortableTreeItem } from "./components";
 import { CSS } from "@dnd-kit/utilities";
@@ -65,7 +65,7 @@ const dropAnimationConfig: DropAnimation = {
   },
 };
 
-function _SortableTree({
+function PrivateSortableTree({
   items,
   onItemsChange: setItems,
   isCollapsible,
@@ -367,14 +367,14 @@ const adjustTranslate: Modifier = ({ transform }) => {
   };
 };
 
-function findItemActualIndex(items, targetId, parent = null) {
-  for (let i = 0; i < items.length; i++) {
+function findItemActualIndex(items: TreeItems, targetId: UniqueIdentifier, parent: UniqueIdentifier | null = null): DropResult | null {
+	for (let i = 0; i < items.length; i++) {
     const item = items[i];
     if (item.id === targetId) {
       return { index: i, parent, movedItem: item };
     }
     if (item.children && item.children.length > 0) {
-      const result = findItemActualIndex(item.children, targetId, item);
+      const result = findItemActualIndex(item.children, targetId, item.id);
       if (result) {
         return result;
       }
@@ -383,4 +383,4 @@ function findItemActualIndex(items, targetId, parent = null) {
   return null;
 }
 
-export const SortableTree = memo(_SortableTree);
+export const SortableTree = memo(PrivateSortableTree);

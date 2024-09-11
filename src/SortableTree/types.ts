@@ -148,7 +148,7 @@ export interface SortableTreeProps {
 /**
  * Represents the result of a drag operation in the tree.
  */
-export interface DropResult {
+export type DropResult  = {
   /**
    * The item that was dragged.
    */
@@ -157,10 +157,10 @@ export interface DropResult {
   /**
    * The new parent of the dragged item, or null if it's now a root item.
    */
-  parent: TreeItem | null;
+  parent: UniqueIdentifier | null;
 
   /**
    * The new index of the dragged item within its parent's children array.
    */
   index: number;
-}
+} | null
