@@ -1,5 +1,5 @@
 {
-  "name": "react-sortable-tree",
+  "name": "@clevertask/react-sortable-tree",
   "private": true,
   "version": "0.0.0",
   "type": "module",
