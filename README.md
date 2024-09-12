@@ -110,16 +110,6 @@ The `OptimizedTreeStructure` is used internally to improve performance for large
 function createOptimizedTreeStructure(items: TreeItems): OptimizedTreeStructure
 ```
 
-## Helper Functions
-
-### createOptimizedTreeStructure
-
-```typescript
-function createOptimizedTreeStructure(items: TreeItems): OptimizedTreeStructure
-```
-
-Use this function to create an `OptimizedTreeStructure` from a `TreeItems` array. This is useful when initializing your state or converting a plain tree structure into an optimized one.
-
 ### removeItemById
 
 ```typescript
@@ -129,6 +119,7 @@ function removeItemById(structure: OptimizedTreeStructure, id: UniqueIdentifier)
 This function removes an item from the tree structure by its ID. It returns a new `OptimizedTreeStructure` with the item removed from both the `items` array and the `itemMap`. It also handles removing the item from nested children.
 
 Usage example:
+
 ```typescript
 const updatedStructure = removeItemById(currentStructure, '123');
 setTreeStructure(updatedStructure);
@@ -147,6 +138,7 @@ function setTreeItemProperties(
 This function updates the properties of a specific tree item. It takes a setter function that receives the current item and returns an object with the properties to be updated. It returns a new `OptimizedTreeStructure` with the updated item in both the `items` array and the `itemMap`.
 
 Usage example:
+
 ```typescript
 setTreeStructure((treeStructure) => {
   return setTreeItemProperties(
