@@ -3,7 +3,7 @@ import { createRoot } from 'react-dom/client'
 import { createOptimizedTreeStructure, SortableTree,} from './index'
 
 const App = () => {
-	const [treeStructure, setTreeStructure] = useState(createOptimizedTreeStructure([{ id: "!", label: "Hello", children: [] }, { id: "w!", label: "Hello", children: [] }]))
+	const [treeStructure, setTreeStructure] = useState(createOptimizedTreeStructure([{ id: "1", label: "Hello", children: [] }, { id: "2", label: "World", children: [] }]))
 	return <SortableTree items={treeStructure.items} onItemsChange={setTreeStructure} isRemovable allowNestedItemAddition showDropIndicator></SortableTree>
 }
 

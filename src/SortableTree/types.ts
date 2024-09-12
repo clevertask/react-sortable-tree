@@ -164,3 +164,5 @@ export type DropResult  = {
    */
   index: number;
 } | null
+
+export type {UniqueIdentifier} from '@dnd-kit/core';
