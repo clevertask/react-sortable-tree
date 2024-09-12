@@ -2,6 +2,23 @@
 
 A customizable React component for rendering and managing tree structures with drag-and-drop functionality.
 
+## Table of Contents
+
+- [Installation](#installation)
+- [Usage](#usage)
+- [Props](#props)
+- [Types](#types)
+  - [TreeItem](#treeitem)
+  - [TreeItems](#treeitems)
+  - [OptimizedTreeStructure](#optimizedtreestructure)
+- [Helper Functions](#helper-functions)
+  - [createOptimizedTreeStructure](#createoptimizedtreestructure)
+  - [removeItemById](#removeitembyid)
+  - [setTreeItemProperties](#settreeitemproperties)
+- [Roadmap](#roadmap)
+- [Release Process](#release-process)
+- [License](#license)
+
 ## Installation
 
 ```bash
@@ -153,8 +170,21 @@ We're constantly working to improve @clevertask/react-sortable-tree. Here are so
 - **Selection and Multi-selection**: Add support for selecting one or multiple items in the tree.
 - **Drag multiple items**: Enable dragging and dropping multiple selected items at once.
 - **API Example**: Provide a comprehensive example illustrating real-world usage with a backend API.
+- **E2E tests**: It will ensure this component's working as expected.
 
 We're excited about these upcoming features and welcome any feedback or contributions from the community. If you have any suggestions or would like to contribute to any of these features, please open an issue or submit a pull request on our GitHub repository.
+
+## Release Process
+
+This package is automatically published to npm when a new release is created on GitHub. To create a new release:
+
+1. Update the version in `package.json` according to semantic versioning rules.
+2. Commit the version change: `git commit -am "Bump version to x.x.x"`
+3. Create a new tag: `git tag vx.x.x`
+4. Push the changes and the tag: `git push && git push --tags`
+5. Go to the GitHub repository and create a new release, selecting the tag you just created.
+
+The GitHub Action will automatically build, test, and publish the new version to npm.
 
 ## License
 
