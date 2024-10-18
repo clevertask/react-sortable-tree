@@ -170,6 +170,15 @@ function PrivateSortableTree({
     setOverId(over?.id ?? null);
   }, []);
 
+  const resetState = useCallback(() => {
+    setOverId(null);
+    setActiveId(null);
+    setOffsetLeft(0);
+    setCurrentPosition(null);
+
+    document.body.style.setProperty("cursor", "");
+  }, []);
+
   const handleDragEnd = useCallback(
     ({ active, over }: DragEndEvent) => {
       resetState();
@@ -191,25 +200,17 @@ function PrivateSortableTree({
         onDragEnd?.(result);
       }
     },
-    [items, projected]
+    [items, projected, onDragEnd, resetState, setItems]
   );
 
   const handleDragCancel = useCallback(() => {
     resetState();
-  }, []);
+  }, [resetState]);
 
-  const resetState = useCallback(() => {
-    setOverId(null);
-    setActiveId(null);
-    setOffsetLeft(0);
-    setCurrentPosition(null);
-
-    document.body.style.setProperty("cursor", "");
-  }, []);
 
   const handleRemove = useCallback((id: UniqueIdentifier) => {
     setItems((items) => removeItemById(items, id));
-  }, []);
+  }, [setItems]);
 
   const handleCollapse = useCallback(
     ({
@@ -231,7 +232,7 @@ function PrivateSortableTree({
         })
       );
     },
-    []
+    [onLazyLoadChildren, setItems]
   );
 
   const getMovementAnnouncement = useCallback(
