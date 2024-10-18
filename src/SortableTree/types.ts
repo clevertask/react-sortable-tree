@@ -100,7 +100,7 @@ export interface SortableTreeProps {
   onLazyLoadChildren?: (
     id: UniqueIdentifier,
     isExpanding: boolean
-  ) => Promise<void>;
+  ) => void;
 
   /**
    * Determines if a drop indicator should be shown when dragging items.
