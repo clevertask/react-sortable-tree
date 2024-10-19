@@ -188,6 +188,16 @@ export function setTreeItemProperties(
   return { items: newItems, itemMap: newMap };
 }
 
+// It yields the information of a tree item by providing its id.
+export function getItemById(
+  structure: OptimizedTreeStructure,
+  id: UniqueIdentifier
+): TreeItem | undefined {
+  const { itemMap } = structure;
+  return itemMap.get(id);
+}
+
+
 // Helper function to create initial optimized structure
 export function createOptimizedTreeStructure(items: TreeItems): OptimizedTreeStructure {
   const itemMap = new Map<UniqueIdentifier, TreeItem>();
