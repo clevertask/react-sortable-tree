@@ -41,8 +41,8 @@ function App() {
 
   return (
     <SortableTree
-      items={treeStructure.items}
-      onItemsChange={setTreeStructure}
+      treeStructure={treeStructure}
+      setTreeStructure={setTreeStructure}
       isCollapsible
       isRemovable
       allowNestedItemAddition
@@ -56,8 +56,8 @@ function App() {
 
 | Prop                      | Type                                                            | Default     | Description                                                                                                          |
 | ------------------------- | --------------------------------------------------------------- | ----------- | -------------------------------------------------------------------------------------------------------------------- |
-| `items`                   | `TreeItems`                                                     | Required    | The array of tree items to be rendered.                                                                              |
-| `onItemsChange`           | `React.Dispatch<React.SetStateAction<OptimizedTreeStructure>>`  | Required    | Callback function called when the tree structure changes.                                                            |
+| `treeStructure`           | `OptimizedTreeStructure`                                        | Required    | The array of tree items to be rendered.                                                                              |
+| `setTreeStructure`        | `React.Dispatch<React.SetStateAction<OptimizedTreeStructure>>`  | Required    | Callback function called when the tree structure changes.                                                            |
 | `indentationWidth`        | `number`                                                        | `undefined` | The indentation width for children elements.                                                                         |
 | `isCollapsible`           | `boolean`                                                       | `false`     | Determines if tree items can be collapsed/expanded.                                                                  |
 | `onLazyLoadChildren`      | `(id: UniqueIdentifier, isExpanding: boolean) => Promise<void>` | `undefined` | Callback for lazy loading child items when a parent is expanded. Useful for getting child items from an API endpoint |
@@ -108,6 +108,15 @@ The `OptimizedTreeStructure` is used internally to improve performance for large
 
 ```typescript
 function createOptimizedTreeStructure(items: TreeItems): OptimizedTreeStructure;
+```
+
+### getItemById
+Retrieves a tree item by its unique identifier.
+```typescript
+function getItemById(
+  structure: OptimizedTreeStructure,
+  id: UniqueIdentifier,
+): TreeItem | undefined;
 ```
 
 ### removeItemById
