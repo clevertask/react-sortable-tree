@@ -1,12 +1,12 @@
-import React, { forwardRef, HTMLAttributes, memo } from "react";
-import styles from "./TreeItem.module.css";
-import classNames from "classnames";
-import { Action } from "../Action";
-import { Handle } from "../Handle";
-import { Remove } from "../Remove";
-import { Add } from "../Add";
+import React, { forwardRef, HTMLAttributes, memo } from 'react';
+import styles from './TreeItem.module.css';
+import classNames from 'classnames';
+import { Action } from '../Action';
+import { Handle } from '../Handle';
+import { Remove } from '../Remove';
+import { Add } from '../Add';
 
-export interface Props extends Omit<HTMLAttributes<HTMLLIElement>, "id"> {
+export interface Props extends Omit<HTMLAttributes<HTMLLIElement>, 'id'> {
   childCount?: number;
   clone?: boolean;
   collapsed?: boolean;
@@ -49,7 +49,7 @@ export const _TreeItem = forwardRef<HTMLDivElement, Props>(
       wrapperRef,
       ...props
     },
-    ref
+    ref,
   ) => {
     return (
       <li
@@ -59,12 +59,12 @@ export const _TreeItem = forwardRef<HTMLDivElement, Props>(
           ghost && styles.ghost,
           indicator && styles.indicator,
           disableSelection && styles.disableSelection,
-          disableInteraction && styles.disableInteraction
+          disableInteraction && styles.disableInteraction,
         )}
         ref={wrapperRef}
         style={
           {
-            "--spacing": `${indentationWidth * depth}px`,
+            '--spacing': `${indentationWidth * depth}px`,
           } as React.CSSProperties
         }
         {...props}
@@ -72,7 +72,10 @@ export const _TreeItem = forwardRef<HTMLDivElement, Props>(
         <div className={styles.TreeItem} ref={ref} style={style}>
           {!disableDragging && <Handle {...handleProps} />}
           {onCollapse && (
-            <Action onClick={onCollapse} className={classNames(styles.Collapse, collapsed && styles.collapsed)}>
+            <Action
+              onClick={onCollapse}
+              className={classNames(styles.Collapse, collapsed && styles.collapsed)}
+            >
               {collapseIcon}
             </Action>
           )}
@@ -81,11 +84,13 @@ export const _TreeItem = forwardRef<HTMLDivElement, Props>(
           </span>
           {!clone && onRemove && <Remove onClick={onRemove} />}
           {!clone && onAdd && <Add onClick={onAdd} />}
-          {clone && childCount && childCount > 1 ? <span className={styles.Count}>{childCount}</span> : null}
+          {clone && childCount && childCount > 1 ?
+            <span className={styles.Count}>{childCount}</span>
+          : null}
         </div>
       </li>
     );
-  }
+  },
 );
 
 const collapseIcon = (
