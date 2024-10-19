@@ -1,16 +1,17 @@
-import { CSSProperties, memo } from "react";
-import type { UniqueIdentifier } from "@dnd-kit/core";
-import { AnimateLayoutChanges, useSortable } from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
+import { CSSProperties, memo } from 'react';
+import type { UniqueIdentifier } from '@dnd-kit/core';
+import { AnimateLayoutChanges, useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
-import { TreeItem, Props as TreeItemProps } from "./TreeItem";
-import { iOS } from "../../utilities";
+import { TreeItem, Props as TreeItemProps } from './TreeItem';
+import { iOS } from '../../utilities';
 
 interface Props extends TreeItemProps {
   id: UniqueIdentifier;
 }
 
-const animateLayoutChanges: AnimateLayoutChanges = ({ isSorting, wasDragging }) => !(isSorting || wasDragging);
+const animateLayoutChanges: AnimateLayoutChanges = ({ isSorting, wasDragging }) =>
+  !(isSorting || wasDragging);
 
 function PrivateSortableTreeItem({ id, depth, ...props }: Props) {
   const {
@@ -41,12 +42,12 @@ function PrivateSortableTreeItem({ id, depth, ...props }: Props) {
       disableSelection={iOS}
       disableInteraction={isSorting}
       handleProps={
-        props.disableDragging
-          ? null
-          : {
-              ...attributes,
-              ...listeners,
-            }
+        props.disableDragging ? null : (
+          {
+            ...attributes,
+            ...listeners,
+          }
+        )
       }
       {...props}
     />

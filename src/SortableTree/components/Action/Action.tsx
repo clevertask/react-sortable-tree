@@ -1,4 +1,4 @@
-import React, {forwardRef, CSSProperties} from 'react';
+import React, { forwardRef, CSSProperties } from 'react';
 import classNames from 'classnames';
 
 import styles from './Action.module.css';
@@ -12,7 +12,7 @@ export interface Props extends React.HTMLAttributes<HTMLButtonElement> {
 }
 
 export const Action = forwardRef<HTMLButtonElement, Props>(
-  ({active, className, cursor, style, ...props}, ref) => {
+  ({ active, className, cursor, style, ...props }, ref) => {
     return (
       <button
         ref={ref}
@@ -29,5 +29,5 @@ export const Action = forwardRef<HTMLButtonElement, Props>(
         }
       />
     );
-  }
+  },
 );

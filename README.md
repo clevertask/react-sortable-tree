@@ -32,12 +32,12 @@ import '@clevertask/react-sortable-tree/dist/style.css';
 import { SortableTree, createOptimizedTreeStructure } from '@clevertask/react-sortable-tree';
 
 function App() {
-  const [treeStructure, setTreeStructure] = useState(createOptimizedTreeStructure([
-    { id: '1', label: 'Item 1', children: [] },
-    { id: '2', label: 'Item 2', children: [
-      { id: '3', label: 'Item 2.1', children: [] }
-    ] },
-  ]));
+  const [treeStructure, setTreeStructure] = useState(
+    createOptimizedTreeStructure([
+      { id: '1', label: 'Item 1', children: [] },
+      { id: '2', label: 'Item 2', children: [{ id: '3', label: 'Item 2.1', children: [] }] },
+    ]),
+  );
 
   return (
     <SortableTree
@@ -54,20 +54,20 @@ function App() {
 
 ## Props
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `items` | `TreeItems` | Required | The array of tree items to be rendered. |
-| `onItemsChange` | `React.Dispatch<React.SetStateAction<OptimizedTreeStructure>>` | Required | Callback function called when the tree structure changes. |
-| `indentationWidth` | `number` | `undefined` | The indentation width for children elements. |
-| `isCollapsible` | `boolean` | `false` | Determines if tree items can be collapsed/expanded. |
-| `onLazyLoadChildren` | `(id: UniqueIdentifier, isExpanding: boolean) => Promise<void>` | `undefined` | Callback for lazy loading child items when a parent is expanded. Useful for getting child items from an API endpoint |
-| `showDropIndicator` | `boolean` | `false` | Determines if a drop indicator should be shown when dragging items. |
-| `isRemovable` | `boolean` | `false` | Determines if items can be removed from the tree. |
-| `onRemoveItem` | `(id: UniqueIdentifier) => void` | `undefined` | Callback function called when an item is removed from the tree. |
-| `allowNestedItemAddition` | `boolean` | `false` | Determines if new items can be added as children to existing items. |
-| `onAddItem` | `(parentId: UniqueIdentifier \| null) => void` | `undefined` | Callback function called when a new item is added to the tree. |
-| `onDragEnd` | `(result: DropResult) => void` | `undefined` | Callback function called when a drag operation ends. |
-| `onItemClick` | `(id: UniqueIdentifier) => void` | `undefined` | Callback function called when an item in the tree is clicked. |
+| Prop                      | Type                                                            | Default     | Description                                                                                                          |
+| ------------------------- | --------------------------------------------------------------- | ----------- | -------------------------------------------------------------------------------------------------------------------- |
+| `items`                   | `TreeItems`                                                     | Required    | The array of tree items to be rendered.                                                                              |
+| `onItemsChange`           | `React.Dispatch<React.SetStateAction<OptimizedTreeStructure>>`  | Required    | Callback function called when the tree structure changes.                                                            |
+| `indentationWidth`        | `number`                                                        | `undefined` | The indentation width for children elements.                                                                         |
+| `isCollapsible`           | `boolean`                                                       | `false`     | Determines if tree items can be collapsed/expanded.                                                                  |
+| `onLazyLoadChildren`      | `(id: UniqueIdentifier, isExpanding: boolean) => Promise<void>` | `undefined` | Callback for lazy loading child items when a parent is expanded. Useful for getting child items from an API endpoint |
+| `showDropIndicator`       | `boolean`                                                       | `false`     | Determines if a drop indicator should be shown when dragging items.                                                  |
+| `isRemovable`             | `boolean`                                                       | `false`     | Determines if items can be removed from the tree.                                                                    |
+| `onRemoveItem`            | `(id: UniqueIdentifier) => void`                                | `undefined` | Callback function called when an item is removed from the tree.                                                      |
+| `allowNestedItemAddition` | `boolean`                                                       | `false`     | Determines if new items can be added as children to existing items.                                                  |
+| `onAddItem`               | `(parentId: UniqueIdentifier \| null) => void`                  | `undefined` | Callback function called when a new item is added to the tree.                                                       |
+| `onDragEnd`               | `(result: DropResult) => void`                                  | `undefined` | Callback function called when a drag operation ends.                                                                 |
+| `onItemClick`             | `(id: UniqueIdentifier) => void`                                | `undefined` | Callback function called when an item in the tree is clicked.                                                        |
 
 ## Types
 
@@ -107,13 +107,16 @@ The `OptimizedTreeStructure` is used internally to improve performance for large
 ### createOptimizedTreeStructure
 
 ```typescript
-function createOptimizedTreeStructure(items: TreeItems): OptimizedTreeStructure
+function createOptimizedTreeStructure(items: TreeItems): OptimizedTreeStructure;
 ```
 
 ### removeItemById
 
 ```typescript
-function removeItemById(structure: OptimizedTreeStructure, id: UniqueIdentifier): OptimizedTreeStructure
+function removeItemById(
+  structure: OptimizedTreeStructure,
+  id: UniqueIdentifier,
+): OptimizedTreeStructure;
 ```
 
 This function removes an item from the tree structure by its ID. It returns a new `OptimizedTreeStructure` with the item removed from both the `items` array and the `itemMap`. It also handles removing the item from nested children.
@@ -131,8 +134,8 @@ setTreeStructure(updatedStructure);
 function setTreeItemProperties(
   structure: OptimizedTreeStructure,
   id: UniqueIdentifier,
-  setter: (value: TreeItem) => Partial<TreeItem>
-): OptimizedTreeStructure
+  setter: (value: TreeItem) => Partial<TreeItem>,
+): OptimizedTreeStructure;
 ```
 
 This function updates the properties of a specific tree item. It takes a setter function that receives the current item and returns an object with the properties to be updated. It returns a new `OptimizedTreeStructure` with the updated item in both the `items` array and the `itemMap`.
@@ -141,11 +144,10 @@ Usage example:
 
 ```typescript
 setTreeStructure((treeStructure) => {
-  return setTreeItemProperties(
-    treeStructure,
-    '123',
-    (item) => ({ label: 'New Label', collapsed: !item.collapsed })
-  );
+  return setTreeItemProperties(treeStructure, '123', (item) => ({
+    label: 'New Label',
+    collapsed: !item.collapsed,
+  }));
 });
 ```
 
