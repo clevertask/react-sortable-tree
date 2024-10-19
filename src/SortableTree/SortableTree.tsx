@@ -78,7 +78,7 @@ const dropAnimationConfig: DropAnimation = {
 
 function PrivateSortableTree({
 	treeStructure,
-	setTreeStructure: setItems,
+	setTreeStructure,
 	isCollapsible,
 	onLazyLoadChildren,
 	showDropIndicator = false,
@@ -238,11 +238,11 @@ function PrivateSortableTree({
 					parentId
 				);
 
-				setItems(createOptimizedTreeStructure(newItems));
+				setTreeStructure(createOptimizedTreeStructure(newItems));
 				onDragEnd?.(result);
 			}
 		},
-		[items, projected, onDragEnd, resetState, setItems]
+		[items, projected, onDragEnd, resetState, setTreeStructure]
 	);
 
 	const handleDragCancel = useCallback(() => {
@@ -251,9 +251,9 @@ function PrivateSortableTree({
 
 	const handleRemove = useCallback(
 		(id: UniqueIdentifier) => {
-			setItems((items) => removeItemById(items, id));
+			setTreeStructure((items) => removeItemById(items, id));
 		},
-		[setItems]
+		[setTreeStructure]
 	);
 
 	const handleCollapse = useCallback(
@@ -270,13 +270,13 @@ function PrivateSortableTree({
 				return onLazyLoadChildren?.(id, Boolean(collapsed));
 			}
 
-			return setItems((items) =>
+			return setTreeStructure((items) =>
 				setTreeItemProperties(items, id, (item) => {
 					return { collapsed: !item.collapsed };
 				})
 			);
 		},
-		[onLazyLoadChildren, setItems]
+		[onLazyLoadChildren, setTreeStructure]
 	);
 
 	const getMovementAnnouncement = useCallback(

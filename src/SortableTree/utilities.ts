@@ -202,7 +202,12 @@ export function getItemById(
 	return itemMap.get(id);
 }
 
-// Helper function to create initial optimized structure
+/**
+ * Creates an optimized tree structure from the given items.
+ * This structure includes both the original items and a map for efficient item lookup.
+ * @param items The original tree items to optimize.
+ * @returns An OptimizedTreeStructure containing the items and their map.
+ */
 export function createOptimizedTreeStructure(
 	items: TreeItems
 ): OptimizedTreeStructure {
