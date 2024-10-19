@@ -1,7 +1,6 @@
-import { StrictMode, useEffect, useState } from "react";
+import { StrictMode, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { createOptimizedTreeStructure, SortableTree } from "./index";
-import { getItemById } from "./SortableTree/utilities";
 
 const App = () => {
 	const [treeStructure, setTreeStructure] = useState(
@@ -15,23 +14,25 @@ const App = () => {
 		])
 	);
 
-	useEffect(() => {
-		console.log(getItemById(treeStructure, "2"));
-	}, [treeStructure]);
-
 	return (
 		<SortableTree
-			items={treeStructure.items}
-			onItemsChange={setTreeStructure}
+			treeStructure={treeStructure}
+			setTreeStructure={setTreeStructure}
 			isRemovable
 			allowNestedItemAddition
 			showDropIndicator
-		></SortableTree>
+		/>
 	);
 };
 
-createRoot(document.getElementById("root")!).render(
-	<StrictMode>
-		<App />
-	</StrictMode>
-);
+const rootElement = document.getElementById("root");
+
+if (rootElement) {
+	createRoot(rootElement).render(
+		<StrictMode>
+			<App />
+		</StrictMode>
+	);
+} else {
+	console.error("Root element not found");
+}
