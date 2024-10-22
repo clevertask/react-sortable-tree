@@ -1,23 +1,27 @@
-import { StrictMode, useState } from 'react';
+import { StrictMode, useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
-import { createOptimizedTreeStructure, SortableTree } from './index';
+import { getItemById, SortableTree, TreeItems } from './index';
 
 const App = () => {
-  const [treeStructure, setTreeStructure] = useState(
-    createOptimizedTreeStructure([
-      { id: '1', label: 'Hello', children: [] },
-      {
-        id: '2',
-        label: 'World',
-        children: [{ id: '2.2', label: 'Hello world!', children: [] }],
-      },
-    ]),
-  );
+  const [treeItems, setTreeItems] = useState<TreeItems>([
+    { id: '1', label: 'Hello', children: [] },
+    {
+      id: '2',
+      label: 'World',
+      children: [
+        { id: '2.2', label: 'Hello world!', children: [{ id: '2.2.2', label: 'a', children: [] }] },
+      ],
+    },
+  ]);
+
+  useEffect(() => {
+    console.log(getItemById(treeItems, '2'));
+  }, [treeItems]);
 
   return (
     <SortableTree
-      treeStructure={treeStructure}
-      setTreeStructure={setTreeStructure}
+      items={treeItems}
+      setItems={setTreeItems}
       isRemovable
       allowNestedItemAddition
       showDropIndicator

@@ -1,6 +1,6 @@
 # @clevertask/react-sortable-tree
 
-A customizable React component for rendering and managing tree structures with drag-and-drop functionality.
+A customizable React component for rendering and managing tree structures with drag-and-drop functionality. This is built on top of the [sortable tree Component from the dnd-kit library](https://github.com/clauderic/dnd-kit/blob/master/stories/3%20-%20Examples/Tree/SortableTree.tsx).
 
 ## Table of Contents
 
@@ -10,9 +10,8 @@ A customizable React component for rendering and managing tree structures with d
 - [Types](#types)
   - [TreeItem](#treeitem)
   - [TreeItems](#treeitems)
-  - [OptimizedTreeStructure](#optimizedtreestructure)
 - [Helper Functions](#helper-functions)
-  - [createOptimizedTreeStructure](#createoptimizedtreestructure)
+  - [getItemById](#getItemById)
   - [removeItemById](#removeitembyid)
   - [setTreeItemProperties](#settreeitemproperties)
 - [Roadmap](#roadmap)
@@ -29,20 +28,19 @@ npm install @clevertask/react-sortable-tree
 
 ```tsx
 import '@clevertask/react-sortable-tree/dist/style.css';
-import { SortableTree, createOptimizedTreeStructure } from '@clevertask/react-sortable-tree';
+import React, { useState } from 'react';
+import { SortableTree, TreeItems } from '@clevertask/react-sortable-tree';
 
 function App() {
-  const [treeStructure, setTreeStructure] = useState(
-    createOptimizedTreeStructure([
-      { id: '1', label: 'Item 1', children: [] },
-      { id: '2', label: 'Item 2', children: [{ id: '3', label: 'Item 2.1', children: [] }] },
-    ]),
-  );
+  const [items, setItems] = useState<TreeItems>([
+    { id: '1', label: 'Item 1', children: [] },
+    { id: '2', label: 'Item 2', children: [{ id: '3', label: 'Item 2.1', children: [] }] },
+  ]);
 
   return (
     <SortableTree
-      treeStructure={treeStructure}
-      setTreeStructure={setTreeStructure}
+      items={items}
+      setItems={setItems}
       isCollapsible
       isRemovable
       allowNestedItemAddition
@@ -56,8 +54,8 @@ function App() {
 
 | Prop                      | Type                                                            | Default     | Description                                                                                                          |
 | ------------------------- | --------------------------------------------------------------- | ----------- | -------------------------------------------------------------------------------------------------------------------- |
-| `treeStructure`           | `OptimizedTreeStructure`                                        | Required    | The array of tree items to be rendered.                                                                              |
-| `setTreeStructure`        | `React.Dispatch<React.SetStateAction<OptimizedTreeStructure>>`  | Required    | Callback function called when the tree structure changes.                                                            |
+| `items`                   | `TreeItems`                                                     | Required    | The array of tree items to be rendered.                                                                              |
+| `setItems`                | `React.Dispatch<React.SetStateAction<TreeItems>>`               | Required    | Callback function called when the tree items array changes.                                                          |
 | `indentationWidth`        | `number`                                                        | `undefined` | The indentation width for children elements.                                                                         |
 | `isCollapsible`           | `boolean`                                                       | `false`     | Determines if tree items can be collapsed/expanded.                                                                  |
 | `onLazyLoadChildren`      | `(id: UniqueIdentifier, isExpanding: boolean) => Promise<void>` | `undefined` | Callback for lazy loading child items when a parent is expanded. Useful for getting child items from an API endpoint |
@@ -91,78 +89,59 @@ type TreeItem = {
 type TreeItems = TreeItem[];
 ```
 
-### OptimizedTreeStructure
-
-```typescript
-interface OptimizedTreeStructure {
-  items: TreeItems;
-  itemMap: Map<UniqueIdentifier, TreeItem>;
-}
-```
-
-The `OptimizedTreeStructure` is used internally to improve performance for large trees. Use the `createOptimizedTreeStructure` function to create this structure from a `TreeItems` array.
-
 ## Helper Functions
 
-### createOptimizedTreeStructure
+### getItemById
 
 ```typescript
-function createOptimizedTreeStructure(items: TreeItems): OptimizedTreeStructure;
+function getItemById(items: TreeItems, id: UniqueIdentifier): TreeItem | undefined;
 ```
 
-### getItemById
 Retrieves a tree item by its unique identifier.
+
+Usage example:
+
 ```typescript
-function getItemById(
-  structure: OptimizedTreeStructure,
-  id: UniqueIdentifier,
-): TreeItem | undefined;
+const item = getItemById(items, '1');
 ```
 
 ### removeItemById
 
 ```typescript
-function removeItemById(
-  structure: OptimizedTreeStructure,
-  id: UniqueIdentifier,
-): OptimizedTreeStructure;
+function removeItemById(items: TreeItems, id: UniqueIdentifier): TreeItems;
 ```
 
-This function removes an item from the tree structure by its ID. It returns a new `OptimizedTreeStructure` with the item removed from both the `items` array and the `itemMap`. It also handles removing the item from nested children.
+This function removes an item from the tree structure by its ID. It returns a new `TreeItems` array with the item removed. It also handles removing the item from nested children.
 
 Usage example:
 
 ```typescript
-const updatedStructure = removeItemById(currentStructure, '123');
-setTreeStructure(updatedStructure);
+const updatedItems = removeItemById(items, '123');
+setItems(updatedItems);
 ```
 
 ### setTreeItemProperties
 
 ```typescript
 function setTreeItemProperties(
-  structure: OptimizedTreeStructure,
+  items: TreeItems,
   id: UniqueIdentifier,
   setter: (value: TreeItem) => Partial<TreeItem>,
-): OptimizedTreeStructure;
+): TreeItems;
 ```
 
-This function updates the properties of a specific tree item. It takes a setter function that receives the current item and returns an object with the properties to be updated. It returns a new `OptimizedTreeStructure` with the updated item in both the `items` array and the `itemMap`.
+This function updates the properties of a specific tree item. It takes a setter function that receives the current item and returns an object with the properties to be updated. It returns a new `TreeItems` array with the updated item.
 
 Usage example:
 
 ```typescript
-setTreeStructure((treeStructure) => {
-  return setTreeItemProperties(treeStructure, '123', (item) => ({
+setItems((items) => {
+  return setTreeItemProperties(items, '123', (item) => ({
     label: 'New Label',
     collapsed: !item.collapsed,
   }));
 });
 ```
-
-These helper functions are designed to work with the `OptimizedTreeStructure` to ensure efficient updates to the tree. They maintain both the tree hierarchy in the `items` array and the fast lookup `O(1)` capability of the `itemMap`.
-
-Use this function to create an `OptimizedTreeStructure` from a `TreeItems` array. This is useful when initializing your state.
 
 ## Roadmap
 
