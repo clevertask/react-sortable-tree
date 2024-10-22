@@ -1,7 +1,7 @@
 import type { UniqueIdentifier } from '@dnd-kit/core';
 import { arrayMove } from '@dnd-kit/sortable';
 
-import type { FlattenedItem, OptimizedTreeStructure, TreeItem, TreeItems } from './types';
+import type { FlattenedItem, TreeItem, TreeItems } from './types';
 
 export const iOS = /iPad|iPhone|iPod/.test(navigator.platform);
 
@@ -113,107 +113,74 @@ export function findItem(items: TreeItem[], itemId: UniqueIdentifier) {
   return items.find(({ id }) => id === itemId);
 }
 
-export function findItemDeep(
-  structure: OptimizedTreeStructure,
-  itemId: UniqueIdentifier,
-): TreeItem | undefined {
-  const item = getItemById(structure, itemId);
+export function findItemDeep(items: TreeItems, itemId: UniqueIdentifier): TreeItem | undefined {
+  const item = getItemById(items, itemId);
   return item;
 }
 
-export function removeItemById(
-  structure: OptimizedTreeStructure,
-  id: UniqueIdentifier,
-): OptimizedTreeStructure {
-  const { items, itemMap } = structure;
-  const newMap = new Map(itemMap);
-
+export function removeItemById(items: TreeItems, id: UniqueIdentifier): TreeItems {
   function removeFromChildren(children: TreeItems): TreeItems {
-    return children.filter((child) => {
-      if (child.id === id) {
-        newMap.delete(id);
-        return false;
-      }
-      if (child.children.length) {
-        child.children = removeFromChildren(child.children);
-      }
-      return true;
-    });
+    return children
+      .filter((child) => child.id !== id)
+      .map((child) => ({
+        ...child,
+        children: removeFromChildren(child.children || []),
+      }));
   }
-
   const newItems = removeFromChildren(items);
-
-  return { items: newItems, itemMap: newMap };
+  return newItems;
 }
 
 export function setTreeItemProperties(
-  structure: OptimizedTreeStructure,
+  items: TreeItems,
   id: UniqueIdentifier,
   setter: (value: TreeItem) => Partial<TreeItem>,
-): OptimizedTreeStructure {
-  const { items, itemMap } = structure;
-  const item = getItemById(structure, id);
+): TreeItems {
+  function updateItemInTree(items: TreeItems): TreeItems {
+    return items.map((item) => {
+      if (item.id === id) {
+        const updatedItem = { ...item, ...setter(item) };
 
-  if (!item) return structure; // Item not found, return unchanged
-
-  const updatedItem = { ...item, ...setter(item) };
-  const newMap = new Map(itemMap);
-  newMap.set(id, updatedItem);
-
-  function updateInTree(children: TreeItem[]): TreeItem[] {
-    return children.map((child) => {
-      if (child.id === id) {
-        // Update the map with all new children
-        if (updatedItem.children) {
-          updatedItem.children.forEach((newChild) => {
-            newMap.set(newChild.id, newChild);
-          });
+        if (updatedItem.children && updatedItem.children.length > 0) {
+          updatedItem.children = updateItemInTree(updatedItem.children);
         }
+
         return updatedItem;
+      } else if (item.children && item.children.length > 0) {
+        return {
+          ...item,
+          children: updateItemInTree(item.children),
+        };
+      } else {
+        return item;
       }
-      if (child.children.length) {
-        return { ...child, children: updateInTree(child.children) };
-      }
-      return child;
     });
   }
 
-  const newItems = updateInTree(items);
+  // Start the recursion with the root items
+  const newItems = updateItemInTree(items);
 
-  return { items: newItems, itemMap: newMap };
+  return newItems;
 }
 
 /**
  * Retrieves a tree item by its unique identifier.
- * @param structure The optimized tree structure containing items and their map.
+ * @param structure The current tree items array
  * @param id The unique identifier of the item to retrieve.
  * @returns The tree item if found, undefined otherwise.
  */
-export function getItemById(
-  structure: OptimizedTreeStructure,
-  id: UniqueIdentifier,
-): TreeItem | undefined {
-  const { itemMap } = structure;
-  return itemMap.get(id);
-}
-
-/**
- * Creates an optimized tree structure from the given items.
- * This structure includes both the original items and a map for efficient item lookup.
- * @param items The original tree items to optimize.
- * @returns An OptimizedTreeStructure containing the items and their map.
- */
-export function createOptimizedTreeStructure(items: TreeItems): OptimizedTreeStructure {
-  const itemMap = new Map<UniqueIdentifier, TreeItem>();
-
-  function addToMap(item: TreeItem) {
-    itemMap.set(item.id, item);
-    item.children.forEach(addToMap);
+export function getItemById(items: TreeItems, id: UniqueIdentifier): TreeItem | undefined {
+  for (const item of items) {
+    if (item.id === id) {
+      return item;
+    } else if (item.children && item.children.length > 0) {
+      const foundItem = getItemById(item.children, id);
+      if (foundItem) {
+        return foundItem;
+      }
+    }
   }
-
-  items.forEach(addToMap);
-
-  return { items, itemMap };
+  return undefined;
 }
 
 function countChildren(items: TreeItem[], count = 0): number {
@@ -226,7 +193,7 @@ function countChildren(items: TreeItem[], count = 0): number {
   }, count);
 }
 
-export function getChildCount(treeStructure: OptimizedTreeStructure, id: UniqueIdentifier) {
+export function getChildCount(treeStructure: TreeItems, id: UniqueIdentifier) {
   const item = findItemDeep(treeStructure, id);
 
   return item ? countChildren(item.children) : 0;

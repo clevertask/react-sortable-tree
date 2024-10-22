@@ -1,11 +1,6 @@
 import type { MutableRefObject } from 'react';
 import type { UniqueIdentifier } from '@dnd-kit/core';
 
-export interface OptimizedTreeStructure {
-  items: TreeItems;
-  itemMap: Map<UniqueIdentifier, TreeItem>;
-}
-
 /**
  * Represents an item in the tree structure.
  */
@@ -77,13 +72,13 @@ export interface SortableTreeProps {
   /**
    * The array of tree items to be rendered.
    */
-  treeStructure: OptimizedTreeStructure;
+  items: TreeItems;
 
   /**
    * Callback function called when the tree structure changes.
    * @param items - The updated array of tree items.
    */
-  setTreeStructure: React.Dispatch<React.SetStateAction<OptimizedTreeStructure>>;
+  setItems: React.Dispatch<React.SetStateAction<TreeItems>>;
 
   /**
    * Determines if tree items can be collapsed/expanded.

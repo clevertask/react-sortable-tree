@@ -29,7 +29,6 @@ import {
   removeItemById,
   removeChildrenOf,
   setTreeItemProperties,
-  createOptimizedTreeStructure,
 } from './utilities';
 import type {
   DropResult,
@@ -73,8 +72,8 @@ const dropAnimationConfig: DropAnimation = {
 };
 
 function PrivateSortableTree({
-  treeStructure,
-  setTreeStructure,
+  items,
+  setItems,
   isCollapsible,
   onLazyLoadChildren,
   showDropIndicator = false,
@@ -86,8 +85,6 @@ function PrivateSortableTree({
   onDragEnd,
   onItemClick,
 }: SortableTreeProps) {
-  const items = useMemo(() => treeStructure.items, [treeStructure.items]);
-
   const [activeId, setActiveId] = useState<UniqueIdentifier | null>(null);
   const [overId, setOverId] = useState<UniqueIdentifier | null>(null);
   const [offsetLeft, setOffsetLeft] = useState(0);
@@ -213,11 +210,11 @@ function PrivateSortableTree({
         const newItems = buildTree(sortedItems);
         const result = findItemActualIndex(newItems, clonedItems[activeIndex].id, parentId);
 
-        setTreeStructure(createOptimizedTreeStructure(newItems));
+        setItems(newItems);
         onDragEnd?.(result);
       }
     },
-    [items, projected, onDragEnd, resetState, setTreeStructure],
+    [items, projected, onDragEnd, resetState, setItems],
   );
 
   const handleDragCancel = useCallback(() => {
@@ -226,9 +223,9 @@ function PrivateSortableTree({
 
   const handleRemove = useCallback(
     (id: UniqueIdentifier) => {
-      setTreeStructure((items) => removeItemById(items, id));
+      setItems((items) => removeItemById(items, id));
     },
-    [setTreeStructure],
+    [setItems],
   );
 
   const handleCollapse = useCallback(
@@ -245,13 +242,13 @@ function PrivateSortableTree({
         return onLazyLoadChildren?.(id, Boolean(collapsed));
       }
 
-      return setTreeStructure((items) =>
+      return setItems((items) =>
         setTreeItemProperties(items, id, (item) => {
           return { collapsed: !item.collapsed };
         }),
       );
     },
-    [onLazyLoadChildren, setTreeStructure],
+    [onLazyLoadChildren, setItems],
   );
 
   const getMovementAnnouncement = useCallback(
@@ -375,7 +372,7 @@ function PrivateSortableTree({
                 id={activeId}
                 depth={activeItem.depth}
                 clone
-                childCount={getChildCount(treeStructure, activeId) + 1}
+                childCount={getChildCount(items, activeId) + 1}
                 value={activeItem.label}
                 indentationWidth={indentationWidth}
               />
