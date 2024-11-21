@@ -24,6 +24,7 @@ export interface Props extends Omit<HTMLAttributes<HTMLLIElement>, 'id'> {
   onAdd?(): void;
   onLabelClick?(): void;
   wrapperRef?(node: HTMLLIElement): void;
+  renderedItem?: React.ReactNode;
 }
 
 export const _TreeItem = forwardRef<HTMLDivElement, Props>(
@@ -47,6 +48,7 @@ export const _TreeItem = forwardRef<HTMLDivElement, Props>(
       style,
       value,
       wrapperRef,
+      renderedItem,
       ...props
     },
     ref,
@@ -82,6 +84,7 @@ export const _TreeItem = forwardRef<HTMLDivElement, Props>(
           <span onClick={onLabelClick} className={styles.Text}>
             {value}
           </span>
+          {!clone && renderedItem && renderedItem}
           {!clone && onRemove && <Remove onClick={onRemove} />}
           {!clone && onAdd && <Add onClick={onAdd} />}
           {clone && childCount && childCount > 1 ?

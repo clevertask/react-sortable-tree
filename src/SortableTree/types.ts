@@ -135,6 +135,14 @@ export interface SortableTreeProps {
    * @param id - The id of the clicked item.
    */
   onItemClick?: (id: UniqueIdentifier) => void;
+
+  /**
+   * You can place a react component next to the item's label. This is temporal while we
+   * figure out a way of rendering a whole custom item
+   * @param item
+   * @returns
+   */
+  renderItem?: (item: TreeItem) => React.ReactNode;
 }
 
 /**
