@@ -84,6 +84,7 @@ function PrivateSortableTree({
   onAddItem,
   onDragEnd,
   onItemClick,
+  renderItem,
 }: SortableTreeProps) {
   const [activeId, setActiveId] = useState<UniqueIdentifier | null>(null);
   const [overId, setOverId] = useState<UniqueIdentifier | null>(null);
@@ -339,7 +340,16 @@ function PrivateSortableTree({
     >
       <SortableContext items={sortedIds} strategy={verticalListSortingStrategy}>
         {flattenedItems.map(
-          ({ id, label, children, collapsed, depth, canFetchChildren, disableDragging }) => (
+          ({
+            id,
+            label,
+            children,
+            collapsed,
+            depth,
+            canFetchChildren,
+            disableDragging,
+            ...rest
+          }) => (
             <SortableTreeItem
               key={id}
               id={id}
@@ -359,6 +369,7 @@ function PrivateSortableTree({
               }
               onAdd={allowNestedItemAddition ? () => onAddItem?.(id) : undefined}
               onLabelClick={onItemClick ? () => onItemClick(id) : undefined}
+              renderedItem={renderItem?.({ id, label, children, ...rest })}
             />
           ),
         )}
