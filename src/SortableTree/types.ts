@@ -1,10 +1,13 @@
 import type { MutableRefObject } from 'react';
 import type { UniqueIdentifier } from '@dnd-kit/core';
+import { Props } from './components/TreeItem/TreeItem';
+
+export type TreeItem<ExtraProps = unknown> = BaseTreeItem & ExtraProps;
 
 /**
  * Represents an item in the tree structure.
  */
-export type TreeItem = {
+export type BaseTreeItem<ExtraProps = unknown> = {
   /**
    * Unique identifier for the item. Can be a string or number.
    */
@@ -18,7 +21,7 @@ export type TreeItem = {
   /**
    * An array of child TreeItems. If empty, the item is a leaf node.
    */
-  children: TreeItem[];
+  children: TreeItem<ExtraProps>[];
 
   /**
    * Determines whether the item's children are initially collapsed.
@@ -47,7 +50,7 @@ export type TreeItem = {
   [key: string]: any;
 };
 
-export type TreeItems = TreeItem[];
+export type TreeItems<ExtraProps = unknown> = TreeItem<ExtraProps>[];
 
 export interface FlattenedItem extends TreeItem {
   parentId: UniqueIdentifier | null;
@@ -142,7 +145,7 @@ export interface SortableTreeProps {
    * @param item
    * @returns
    */
-  renderItem?: (item: TreeItem) => React.ReactNode;
+  renderItem?: Props['renderItem'];
 }
 
 /**

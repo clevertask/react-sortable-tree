@@ -5,6 +5,17 @@ import { Action } from '../Action';
 import { Handle } from '../Handle';
 import { Remove } from '../Remove';
 import { Add } from '../Add';
+import { TreeItemStructureProps } from '../TreeItemStructure';
+import { TreeItem as TTreeItem } from '../../types';
+
+export interface RenderItemProps
+  extends Pick<
+    TreeItemStructureProps,
+    'classNames' | 'layoutStyle' | 'dropZoneRef' | 'draggableItemRef'
+  > {
+  dragListeners?: any;
+  treeItem: TTreeItem;
+}
 
 export interface Props extends Omit<HTMLAttributes<HTMLLIElement>, 'id'> {
   childCount?: number;
@@ -18,13 +29,13 @@ export interface Props extends Omit<HTMLAttributes<HTMLLIElement>, 'id'> {
   handleProps?: any;
   indicator?: boolean;
   indentationWidth: number;
-  value: string;
+  value: TTreeItem;
   onCollapse?(): void;
   onRemove?(): void;
   onAdd?(): void;
   onLabelClick?(): void;
-  wrapperRef?(node: HTMLLIElement): void;
-  renderedItem?: React.ReactNode;
+  wrapperRef: RenderItemProps['dropZoneRef'];
+  renderItem?: (props: RenderItemProps) => React.ReactNode;
 }
 
 export const _TreeItem = forwardRef<HTMLDivElement, Props>(
@@ -48,51 +59,59 @@ export const _TreeItem = forwardRef<HTMLDivElement, Props>(
       style,
       value,
       wrapperRef,
-      renderedItem,
+      renderItem,
       ...props
     },
     ref,
   ) => {
-    return (
-      <li
-        className={classNames(
-          styles.Wrapper,
-          clone && styles.clone,
-          ghost && styles.ghost,
-          indicator && styles.indicator,
-          disableSelection && styles.disableSelection,
-          disableInteraction && styles.disableInteraction,
-        )}
-        ref={wrapperRef}
-        style={
-          {
-            '--spacing': `${indentationWidth * depth}px`,
-          } as React.CSSProperties
-        }
-        {...props}
-      >
-        <div className={styles.TreeItem} ref={ref} style={style}>
-          {!disableDragging && <Handle {...handleProps} />}
-          {onCollapse && (
-            <Action
-              onClick={onCollapse}
-              className={classNames(styles.Collapse, collapsed && styles.collapsed)}
-            >
-              {collapseIcon}
-            </Action>
+    return renderItem ?
+        renderItem({
+          dropZoneRef: wrapperRef,
+          draggableItemRef: ref,
+          treeItem: value,
+          layoutStyle: {
+            paddingLeft: `${indentationWidth * depth}px`,
+            ...style,
+          },
+          dragListeners: handleProps,
+        })
+      : <li
+          className={classNames(
+            styles.Wrapper,
+            clone && styles.clone,
+            ghost && styles.ghost,
+            indicator && styles.indicator,
+            disableSelection && styles.disableSelection,
+            disableInteraction && styles.disableInteraction,
           )}
-          <span onClick={onLabelClick} className={styles.Text}>
-            {value}
-          </span>
-          {!clone && renderedItem && renderedItem}
-          {!clone && onRemove && <Remove onClick={onRemove} />}
-          {!clone && onAdd && <Add onClick={onAdd} />}
-          {clone && childCount && childCount > 1 ?
-            <span className={styles.Count}>{childCount}</span>
-          : null}
-        </div>
-      </li>
-    );
+          ref={wrapperRef}
+          style={
+            {
+              '--spacing': `${indentationWidth * depth}px`,
+            } as React.CSSProperties
+          }
+          {...props}
+        >
+          <div className={styles.TreeItem} ref={ref} style={style}>
+            {!disableDragging && <Handle {...handleProps} />}
+            {onCollapse && (
+              <Action
+                onClick={onCollapse}
+                className={classNames(styles.Collapse, collapsed && styles.collapsed)}
+              >
+                {collapseIcon}
+              </Action>
+            )}
+            <span onClick={onLabelClick} className={styles.Text}>
+              {value.label}
+            </span>
+            {!clone && onRemove && <Remove onClick={onRemove} />}
+            {!clone && onAdd && <Add onClick={onAdd} />}
+            {clone && childCount && childCount > 1 ?
+              <span className={styles.Count}>{childCount}</span>
+            : null}
+          </div>
+        </li>;
   },
 );
 

@@ -339,21 +339,13 @@ function PrivateSortableTree({
       onDragCancel={handleDragCancel}
     >
       <SortableContext items={sortedIds} strategy={verticalListSortingStrategy}>
-        {flattenedItems.map(
-          ({
-            id,
-            label,
-            children,
-            collapsed,
-            depth,
-            canFetchChildren,
-            disableDragging,
-            ...rest
-          }) => (
+        {flattenedItems.map((item) => {
+          const { id, children, collapsed, depth, canFetchChildren, disableDragging } = item;
+          return (
             <SortableTreeItem
               key={id}
               id={id}
-              value={label}
+              value={item}
               disableDragging={Boolean(disableDragging)}
               depth={id === activeId && projected ? projected.depth : depth}
               indentationWidth={indentationWidth}
@@ -369,10 +361,10 @@ function PrivateSortableTree({
               }
               onAdd={allowNestedItemAddition ? () => onAddItem?.(id) : undefined}
               onLabelClick={onItemClick ? () => onItemClick(id) : undefined}
-              renderedItem={renderItem?.({ id, label, children, ...rest })}
+              renderItem={renderItem}
             />
-          ),
-        )}
+          );
+        })}
         {createPortal(
           <DragOverlay
             dropAnimation={dropAnimationConfig}
@@ -384,8 +376,9 @@ function PrivateSortableTree({
                 depth={activeItem.depth}
                 clone
                 childCount={getChildCount(items, activeId) + 1}
-                value={activeItem.label}
+                value={activeItem}
                 indentationWidth={indentationWidth}
+                renderItem={renderItem}
               />
             : null}
           </DragOverlay>,
