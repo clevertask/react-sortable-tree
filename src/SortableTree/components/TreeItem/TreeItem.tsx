@@ -8,7 +8,7 @@ import { Add } from '../Add';
 import { TreeItemStructureProps } from '../TreeItemStructure';
 import { TreeItem as TTreeItem } from '../../types';
 
-export interface RenderItemProps
+export interface RenderItemProps<T extends TTreeItem = TTreeItem>
   extends Pick<
       TreeItemStructureProps,
       'classNames' | 'layoutStyle' | 'dropZoneRef' | 'draggableItemRef'
@@ -22,16 +22,18 @@ export interface RenderItemProps
       | 'indicator'
       | 'disableSelection'
       | 'disableInteraction'
+      | 'collapsed'
     > {
   dragListeners?: any;
-  treeItem: TTreeItem;
+  treeItem: T;
   dataSlots: {
     dropZone: Record<string, boolean | undefined>;
     draggableItem: Record<string, string>;
   };
 }
 
-export interface Props extends Omit<HTMLAttributes<HTMLLIElement>, 'id'> {
+export interface Props<T extends TTreeItem = TTreeItem>
+  extends Omit<HTMLAttributes<HTMLLIElement>, 'id'> {
   childCount?: number;
   clone?: boolean;
   collapsed?: boolean;
@@ -43,13 +45,13 @@ export interface Props extends Omit<HTMLAttributes<HTMLLIElement>, 'id'> {
   handleProps?: any;
   indicator?: boolean;
   indentationWidth: number;
-  value: TTreeItem;
+  value: T;
   onCollapse?(): void;
   onRemove?(): void;
   onAdd?(): void;
   onLabelClick?(): void;
-  wrapperRef: RenderItemProps['dropZoneRef'];
-  renderItem?: (props: RenderItemProps) => React.ReactNode;
+  wrapperRef: RenderItemProps<T>['dropZoneRef'];
+  renderItem?: (props: RenderItemProps<T>) => React.ReactNode;
 }
 
 export const _TreeItem = forwardRef<HTMLDivElement, Props>(
@@ -107,6 +109,7 @@ export const _TreeItem = forwardRef<HTMLDivElement, Props>(
           indicator,
           disableSelection,
           disableInteraction,
+          collapsed,
         })
       : <li
           className={classNames(

@@ -1,4 +1,4 @@
-import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import {
   Announcements,
@@ -71,7 +71,7 @@ const dropAnimationConfig: DropAnimation = {
   },
 };
 
-function PrivateSortableTree({
+function PrivateSortableTree<T extends TreeItem = TreeItem>({
   items,
   setItems,
   isCollapsible,
@@ -85,7 +85,7 @@ function PrivateSortableTree({
   onDragEnd,
   onItemClick,
   renderItem,
-}: SortableTreeProps) {
+}: SortableTreeProps<T>) {
   const [activeId, setActiveId] = useState<UniqueIdentifier | null>(null);
   const [overId, setOverId] = useState<UniqueIdentifier | null>(null);
   const [offsetLeft, setOffsetLeft] = useState(0);
@@ -416,4 +416,6 @@ function findItemActualIndex(
   return null;
 }
 
-export const SortableTree = memo(PrivateSortableTree);
+export const SortableTree = <T extends TreeItem = TreeItem>(props: SortableTreeProps<T>) => {
+  return <PrivateSortableTree {...props} />;
+};

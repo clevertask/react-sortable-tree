@@ -29,7 +29,7 @@ const App = () => {
     },
   ]);
 
-  const MyCustomTreeItem = (props: RenderItemProps) => {
+  const MyCustomTreeItem = (props: RenderItemProps<CustomTreeItem>) => {
     const useSortableTreeGlobalStyles = createSortableTreeGlobalStyles({
       indicatorColor: 'orange',
       indicatorBorderColor: 'orange',
@@ -45,7 +45,7 @@ const App = () => {
   };
 
   return (
-    <SortableTree
+    <SortableTree<CustomTreeItem>
       isCollapsible
       showDropIndicator
       items={treeItems}

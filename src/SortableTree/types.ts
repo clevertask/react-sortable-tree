@@ -61,7 +61,7 @@ export type SensorContext = MutableRefObject<{
 /**
  * Props for the SortableTree component.
  */
-export interface SortableTreeProps {
+export interface SortableTreeProps<T extends TreeItem = TreeItem> {
   /**
    * A control that lets you add the indentation width for children elements
    */
@@ -70,13 +70,13 @@ export interface SortableTreeProps {
   /**
    * The array of tree items to be rendered.
    */
-  items: TreeItems;
+  items: TreeItems<T>;
 
   /**
    * Callback function called when the tree structure changes.
    * @param items - The updated array of tree items.
    */
-  setItems: React.Dispatch<React.SetStateAction<TreeItems>>;
+  setItems: React.Dispatch<React.SetStateAction<TreeItems<T>>>;
 
   /**
    * Determines if tree items can be collapsed/expanded.
@@ -140,7 +140,7 @@ export interface SortableTreeProps {
    * @param item
    * @returns
    */
-  renderItem?: Props['renderItem'];
+  renderItem?: Props<T>['renderItem'];
 }
 
 /**
