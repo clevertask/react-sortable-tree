@@ -10,11 +10,25 @@ import { TreeItem as TTreeItem } from '../../types';
 
 export interface RenderItemProps
   extends Pick<
-    TreeItemStructureProps,
-    'classNames' | 'layoutStyle' | 'dropZoneRef' | 'draggableItemRef'
-  > {
+      TreeItemStructureProps,
+      'classNames' | 'layoutStyle' | 'dropZoneRef' | 'draggableItemRef'
+    >,
+    Pick<
+      Props,
+      | 'onCollapse'
+      | 'childCount'
+      | 'clone'
+      | 'ghost'
+      | 'indicator'
+      | 'disableSelection'
+      | 'disableInteraction'
+    > {
   dragListeners?: any;
   treeItem: TTreeItem;
+  dataSlots: {
+    dropZone: Record<string, boolean | undefined>;
+    draggableItem: Record<string, string>;
+  };
 }
 
 export interface Props extends Omit<HTMLAttributes<HTMLLIElement>, 'id'> {
@@ -69,11 +83,30 @@ export const _TreeItem = forwardRef<HTMLDivElement, Props>(
           dropZoneRef: wrapperRef,
           draggableItemRef: ref,
           treeItem: value,
+          dataSlots: {
+            dropZone: {
+              'data-clone': clone,
+              'data-ghost': ghost,
+              'data-indicator': indicator,
+              'data-disable-interaction': disableInteraction,
+              'data-disable-selection': disableSelection,
+            },
+            draggableItem: {
+              'data-slot': 'draggableItem',
+            },
+          },
           layoutStyle: {
             paddingLeft: `${indentationWidth * depth}px`,
             ...style,
           },
           dragListeners: handleProps,
+          onCollapse,
+          childCount,
+          clone,
+          ghost,
+          indicator,
+          disableSelection,
+          disableInteraction,
         })
       : <li
           className={classNames(

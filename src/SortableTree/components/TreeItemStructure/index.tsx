@@ -1,4 +1,7 @@
-export interface TreeItemStructureProps {
+import clsNames from 'classnames';
+import { RenderItemProps } from '../TreeItem/TreeItem';
+
+export interface TreeItemStructureProps extends Pick<RenderItemProps, 'dataSlots'> {
   dropZoneRef: (element: HTMLElement | null) => void;
   draggableItemRef: React.Ref<any>;
   layoutStyle?: React.CSSProperties;
@@ -21,11 +24,21 @@ export const TreeItemStructure = ({
   asDraggableItem: DraggableComponent = 'div',
   draggableItemProps,
   children,
+  dataSlots,
 }: TreeItemStructureProps) => {
   return (
-    <DropZoneComponent ref={dropZoneRef} className={classNames.dropZone} style={layoutStyle}>
+    <DropZoneComponent
+      ref={dropZoneRef}
+      className={classNames.dropZone}
+      style={layoutStyle}
+      {...dataSlots.dropZone}
+    >
       {children ?
-        <DraggableComponent ref={draggableItemRef} className={classNames.draggableItem}>
+        <DraggableComponent
+          ref={draggableItemRef}
+          className={classNames.draggableItem}
+          {...dataSlots.draggableItem}
+        >
           {children}
         </DraggableComponent>
       : <DraggableComponent

@@ -1,6 +1,13 @@
-import { forwardRef, StrictMode, useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
-import { getItemById, SortableTree, TreeItem, TreeItems, TreeItemStructure } from './index';
+import { StrictMode, useState } from 'react';
+import { Handle } from './SortableTree/components/Handle';
+import {
+  createSortableTreeGlobalStyles,
+  SortableTree,
+  TreeItem,
+  TreeItems,
+  TreeItemStructure,
+} from './index';
 import { RenderItemProps } from './SortableTree/components/TreeItem/TreeItem';
 
 type CustomTreeItem = TreeItem<{
@@ -9,19 +16,6 @@ type CustomTreeItem = TreeItem<{
   metadata?: Record<string, any>;
 }>;
 type MyTreeItem = TreeItems<CustomTreeItem>;
-
-const MyCustomTreeItem = forwardRef<
-  HTMLDivElement,
-  { treeItem: CustomTreeItem; dragListeners: RenderItemProps['dragListeners'] }
->(({ treeItem, dragListeners }, ref) => {
-  return (
-    <div ref={ref}>
-      <span {...dragListeners}>Drag me</span>
-      <strong>{treeItem.label}</strong>
-      <button onClick={() => console.log(treeItem.metadata)}>Remove</button>
-    </div>
-  );
-});
 
 const App = () => {
   const [treeItems, setTreeItems] = useState<MyTreeItem>([
@@ -35,34 +29,28 @@ const App = () => {
     },
   ]);
 
-  useEffect(() => {
-    console.log(getItemById(treeItems, '2'));
-  }, [treeItems]);
+  const MyCustomTreeItem = (props: RenderItemProps) => {
+    const useSortableTreeGlobalStyles = createSortableTreeGlobalStyles({
+      indicatorColor: 'orange',
+      indicatorBorderColor: 'orange',
+    });
+    useSortableTreeGlobalStyles();
+
+    return (
+      <TreeItemStructure {...props}>
+        <Handle {...props.dragListeners} />
+        <p>{props.treeItem.label}</p>
+      </TreeItemStructure>
+    );
+  };
 
   return (
     <SortableTree
+      isCollapsible
+      showDropIndicator
       items={treeItems}
       setItems={setTreeItems}
-      isRemovable
-      allowNestedItemAddition
-      showDropIndicator
-      renderItem={(props) => {
-        return (
-          <TreeItemStructure
-            {...props}
-            asDraggableItem={MyCustomTreeItem}
-            draggableItemProps={{ treeItem: props.treeItem, dragListeners: props.dragListeners }}
-          />
-
-          // <TreeItemStructure {...props}>
-          //   <Handle {...props.dragListeners} />
-          //   <span>{props.treeItem.label}</span>
-          //   <button onClick={() => console.log(props.treeItem.id)}>Toggle</button>
-          //   <button onClick={() => console.log(props.treeItem.id)}>Remove</button>
-          //   <button onClick={() => console.log(props.treeItem.id)}>Add</button>
-          // </TreeItemStructure>
-        );
-      }}
+      renderItem={MyCustomTreeItem}
     />
   );
 };

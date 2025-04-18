@@ -43,11 +43,6 @@ export type BaseTreeItem<ExtraProps = unknown> = {
    * @default false
    */
   disableDragging?: boolean;
-
-  /**
-   * Any additional custom properties can be added here.
-   */
-  [key: string]: any;
 };
 
 export type TreeItems<ExtraProps = unknown> = TreeItem<ExtraProps>[];
