@@ -1,10 +1,25 @@
-import { StrictMode, useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
-import { getItemById, SortableTree, TreeItems } from './index';
+import { StrictMode, useState } from 'react';
+import { Handle } from './SortableTree/components/Handle';
+import {
+  createSortableTreeGlobalStyles,
+  SortableTree,
+  TreeItem,
+  TreeItems,
+  TreeItemStructure,
+} from './index';
+import { RenderItemProps } from './SortableTree/components/TreeItem/TreeItem';
+
+type CustomTreeItem = TreeItem<{
+  icon?: string;
+  description?: string;
+  metadata?: Record<string, any>;
+}>;
+type MyTreeItem = TreeItems<CustomTreeItem>;
 
 const App = () => {
-  const [treeItems, setTreeItems] = useState<TreeItems>([
-    { id: '1', label: 'Hello', children: [] },
+  const [treeItems, setTreeItems] = useState<MyTreeItem>([
+    { id: '1', label: 'Hello', children: [], metadata: { a: 'foo' } },
     {
       id: '2',
       label: 'World',
@@ -14,17 +29,31 @@ const App = () => {
     },
   ]);
 
-  useEffect(() => {
-    console.log(getItemById(treeItems, '2'));
-  }, [treeItems]);
+  const MyCustomTreeItem = (props: RenderItemProps<CustomTreeItem>) => {
+    const useSortableTreeGlobalStyles = createSortableTreeGlobalStyles({
+      indicatorColor: 'red',
+      indicatorBorderColor: 'red',
+    });
+    useSortableTreeGlobalStyles();
+    console.log(props.dataSlots.dropZone['data-clone']);
+    return (
+      <TreeItemStructure
+        {...props}
+        draggableItemStyle={{ background: 'violet', display: 'flex', border: '1px solid yellow' }}
+      >
+        <Handle {...props.dragListeners} />
+        <p>{props.treeItem.label}</p>
+      </TreeItemStructure>
+    );
+  };
 
   return (
-    <SortableTree
+    <SortableTree<CustomTreeItem>
+      isCollapsible
+      showDropIndicator
       items={treeItems}
       setItems={setTreeItems}
-      isRemovable
-      allowNestedItemAddition
-      showDropIndicator
+      renderItem={MyCustomTreeItem}
     />
   );
 };

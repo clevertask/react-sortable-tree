@@ -1,4 +1,4 @@
-import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import {
   Announcements,
@@ -71,7 +71,7 @@ const dropAnimationConfig: DropAnimation = {
   },
 };
 
-function PrivateSortableTree({
+function PrivateSortableTree<T extends TreeItem = TreeItem>({
   items,
   setItems,
   isCollapsible,
@@ -85,7 +85,7 @@ function PrivateSortableTree({
   onDragEnd,
   onItemClick,
   renderItem,
-}: SortableTreeProps) {
+}: SortableTreeProps<T>) {
   const [activeId, setActiveId] = useState<UniqueIdentifier | null>(null);
   const [overId, setOverId] = useState<UniqueIdentifier | null>(null);
   const [offsetLeft, setOffsetLeft] = useState(0);
@@ -211,7 +211,7 @@ function PrivateSortableTree({
         const newItems = buildTree(sortedItems);
         const result = findItemActualIndex(newItems, clonedItems[activeIndex].id, parentId);
 
-        setItems(newItems);
+        setItems(newItems as TreeItems<T>);
         onDragEnd?.(result);
       }
     },
@@ -245,7 +245,7 @@ function PrivateSortableTree({
 
       return setItems((items) =>
         setTreeItemProperties(items, id, (item) => {
-          return { collapsed: !item.collapsed };
+          return { collapsed: !item.collapsed } as T;
         }),
       );
     },
@@ -339,21 +339,13 @@ function PrivateSortableTree({
       onDragCancel={handleDragCancel}
     >
       <SortableContext items={sortedIds} strategy={verticalListSortingStrategy}>
-        {flattenedItems.map(
-          ({
-            id,
-            label,
-            children,
-            collapsed,
-            depth,
-            canFetchChildren,
-            disableDragging,
-            ...rest
-          }) => (
+        {flattenedItems.map((item) => {
+          const { id, children, collapsed, depth, canFetchChildren, disableDragging } = item;
+          return (
             <SortableTreeItem
               key={id}
               id={id}
-              value={label}
+              value={item}
               disableDragging={Boolean(disableDragging)}
               depth={id === activeId && projected ? projected.depth : depth}
               indentationWidth={indentationWidth}
@@ -369,10 +361,10 @@ function PrivateSortableTree({
               }
               onAdd={allowNestedItemAddition ? () => onAddItem?.(id) : undefined}
               onLabelClick={onItemClick ? () => onItemClick(id) : undefined}
-              renderedItem={renderItem?.({ id, label, children, ...rest })}
+              renderItem={renderItem}
             />
-          ),
-        )}
+          );
+        })}
         {createPortal(
           <DragOverlay
             dropAnimation={dropAnimationConfig}
@@ -384,8 +376,9 @@ function PrivateSortableTree({
                 depth={activeItem.depth}
                 clone
                 childCount={getChildCount(items, activeId) + 1}
-                value={activeItem.label}
+                value={activeItem}
                 indentationWidth={indentationWidth}
+                renderItem={renderItem}
               />
             : null}
           </DragOverlay>,
@@ -423,4 +416,6 @@ function findItemActualIndex(
   return null;
 }
 
-export const SortableTree = memo(PrivateSortableTree);
+export const SortableTree = <T extends TreeItem = TreeItem>(props: SortableTreeProps<T>) => {
+  return <PrivateSortableTree {...props} />;
+};

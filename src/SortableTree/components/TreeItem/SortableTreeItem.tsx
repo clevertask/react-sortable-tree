@@ -34,6 +34,7 @@ function PrivateSortableTreeItem({ id, depth, ...props }: Props) {
 
   return (
     <TreeItem
+      {...props}
       ref={setDraggableNodeRef}
       wrapperRef={setDroppableNodeRef}
       style={style}
@@ -49,7 +50,6 @@ function PrivateSortableTreeItem({ id, depth, ...props }: Props) {
           }
         )
       }
-      {...props}
     />
   );
 }

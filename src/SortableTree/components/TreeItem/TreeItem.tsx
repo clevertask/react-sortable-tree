@@ -5,8 +5,35 @@ import { Action } from '../Action';
 import { Handle } from '../Handle';
 import { Remove } from '../Remove';
 import { Add } from '../Add';
+import { TreeItemStructureProps } from '../TreeItemStructure';
+import { TreeItem as TTreeItem } from '../../types';
 
-export interface Props extends Omit<HTMLAttributes<HTMLLIElement>, 'id'> {
+export interface RenderItemProps<T extends TTreeItem = TTreeItem>
+  extends Pick<
+      TreeItemStructureProps,
+      'classNames' | 'dropZoneStyle' | 'dropZoneRef' | 'draggableItemRef'
+    >,
+    Pick<
+      Props,
+      | 'onCollapse'
+      | 'childCount'
+      | 'clone'
+      | 'ghost'
+      | 'indicator'
+      | 'disableSelection'
+      | 'disableInteraction'
+      | 'collapsed'
+    > {
+  dragListeners?: any;
+  treeItem: T;
+  dataSlots: {
+    dropZone: Record<string, string | boolean | undefined>;
+    draggableItem: Record<string, string>;
+  };
+}
+
+export interface Props<T extends TTreeItem = TTreeItem>
+  extends Omit<HTMLAttributes<HTMLLIElement>, 'id'> {
   childCount?: number;
   clone?: boolean;
   collapsed?: boolean;
@@ -18,13 +45,13 @@ export interface Props extends Omit<HTMLAttributes<HTMLLIElement>, 'id'> {
   handleProps?: any;
   indicator?: boolean;
   indentationWidth: number;
-  value: string;
+  value: T;
   onCollapse?(): void;
   onRemove?(): void;
   onAdd?(): void;
   onLabelClick?(): void;
-  wrapperRef?(node: HTMLLIElement): void;
-  renderedItem?: React.ReactNode;
+  wrapperRef: RenderItemProps<T>['dropZoneRef'];
+  renderItem?: (props: RenderItemProps<T>) => React.ReactNode;
 }
 
 export const _TreeItem = forwardRef<HTMLDivElement, Props>(
@@ -48,51 +75,80 @@ export const _TreeItem = forwardRef<HTMLDivElement, Props>(
       style,
       value,
       wrapperRef,
-      renderedItem,
+      renderItem,
       ...props
     },
     ref,
   ) => {
-    return (
-      <li
-        className={classNames(
-          styles.Wrapper,
-          clone && styles.clone,
-          ghost && styles.ghost,
-          indicator && styles.indicator,
-          disableSelection && styles.disableSelection,
-          disableInteraction && styles.disableInteraction,
-        )}
-        ref={wrapperRef}
-        style={
-          {
-            '--spacing': `${indentationWidth * depth}px`,
-          } as React.CSSProperties
-        }
-        {...props}
-      >
-        <div className={styles.TreeItem} ref={ref} style={style}>
-          {!disableDragging && <Handle {...handleProps} />}
-          {onCollapse && (
-            <Action
-              onClick={onCollapse}
-              className={classNames(styles.Collapse, collapsed && styles.collapsed)}
-            >
-              {collapseIcon}
-            </Action>
+    return renderItem ?
+        renderItem({
+          dropZoneRef: wrapperRef,
+          draggableItemRef: ref,
+          treeItem: value,
+          dataSlots: {
+            dropZone: {
+              'data-slot': 'dropZone',
+              'data-clone': clone,
+              'data-ghost': ghost,
+              'data-indicator': indicator,
+              'data-disable-interaction': disableInteraction,
+              'data-disable-selection': disableSelection,
+            },
+            draggableItem: {
+              'data-slot': 'draggableItem',
+            },
+          },
+          dropZoneStyle: {
+            paddingLeft: `${indentationWidth * depth}px`,
+            ...style,
+          },
+          dragListeners: handleProps,
+          onCollapse,
+          childCount,
+          clone,
+          ghost,
+          indicator,
+          disableSelection,
+          disableInteraction,
+          collapsed,
+        })
+      : <li
+          className={classNames(
+            styles.Wrapper,
+            clone && styles.clone,
+            ghost && styles.ghost,
+            indicator && styles.indicator,
+            disableSelection && styles.disableSelection,
+            disableInteraction && styles.disableInteraction,
           )}
-          <span onClick={onLabelClick} className={styles.Text}>
-            {value}
-          </span>
-          {!clone && renderedItem && renderedItem}
-          {!clone && onRemove && <Remove onClick={onRemove} />}
-          {!clone && onAdd && <Add onClick={onAdd} />}
-          {clone && childCount && childCount > 1 ?
-            <span className={styles.Count}>{childCount}</span>
-          : null}
-        </div>
-      </li>
-    );
+          ref={wrapperRef}
+          style={
+            {
+              '--spacing': `${indentationWidth * depth}px`,
+            } as React.CSSProperties
+          }
+          {...props}
+        >
+          <div className={styles.TreeItem} ref={ref} style={style}>
+            {!disableDragging && <Handle {...handleProps} />}
+            {onCollapse && (
+              <Action
+                onClick={onCollapse}
+                className={classNames(styles.Collapse, collapsed && styles.collapsed)}
+              >
+                {collapseIcon}
+              </Action>
+            )}
+            <span onClick={onLabelClick} className={styles.Text}>
+              {value.label}
+            </span>
+            {!clone && onRemove && <Remove onClick={onRemove} />}
+            {!clone && onAdd && <Add onClick={onAdd} />}
+            {clone && childCount && childCount > 1 ?
+              <span className={styles.Count}>{childCount}</span>
+            : null}
+          </div>
+        </li>;
   },
 );
 

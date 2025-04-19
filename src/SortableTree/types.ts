@@ -1,10 +1,13 @@
 import type { MutableRefObject } from 'react';
 import type { UniqueIdentifier } from '@dnd-kit/core';
+import { Props } from './components/TreeItem/TreeItem';
+
+export type TreeItem<ExtraProps = unknown> = BaseTreeItem & ExtraProps;
 
 /**
  * Represents an item in the tree structure.
  */
-export type TreeItem = {
+export type BaseTreeItem<ExtraProps = unknown> = {
   /**
    * Unique identifier for the item. Can be a string or number.
    */
@@ -18,7 +21,7 @@ export type TreeItem = {
   /**
    * An array of child TreeItems. If empty, the item is a leaf node.
    */
-  children: TreeItem[];
+  children: TreeItem<ExtraProps>[];
 
   /**
    * Determines whether the item's children are initially collapsed.
@@ -40,14 +43,9 @@ export type TreeItem = {
    * @default false
    */
   disableDragging?: boolean;
-
-  /**
-   * Any additional custom properties can be added here.
-   */
-  [key: string]: any;
 };
 
-export type TreeItems = TreeItem[];
+export type TreeItems<ExtraProps = unknown> = TreeItem<ExtraProps>[];
 
 export interface FlattenedItem extends TreeItem {
   parentId: UniqueIdentifier | null;
@@ -63,7 +61,7 @@ export type SensorContext = MutableRefObject<{
 /**
  * Props for the SortableTree component.
  */
-export interface SortableTreeProps {
+export interface SortableTreeProps<T extends TreeItem = TreeItem> {
   /**
    * A control that lets you add the indentation width for children elements
    */
@@ -72,13 +70,13 @@ export interface SortableTreeProps {
   /**
    * The array of tree items to be rendered.
    */
-  items: TreeItems;
+  items: TreeItems<T>;
 
   /**
    * Callback function called when the tree structure changes.
    * @param items - The updated array of tree items.
    */
-  setItems: React.Dispatch<React.SetStateAction<TreeItems>>;
+  setItems: React.Dispatch<React.SetStateAction<TreeItems<T>>>;
 
   /**
    * Determines if tree items can be collapsed/expanded.
@@ -142,7 +140,7 @@ export interface SortableTreeProps {
    * @param item
    * @returns
    */
-  renderItem?: (item: TreeItem) => React.ReactNode;
+  renderItem?: Props<T>['renderItem'];
 }
 
 /**
