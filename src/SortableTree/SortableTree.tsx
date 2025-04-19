@@ -211,7 +211,7 @@ function PrivateSortableTree<T extends TreeItem = TreeItem>({
         const newItems = buildTree(sortedItems);
         const result = findItemActualIndex(newItems, clonedItems[activeIndex].id, parentId);
 
-        setItems(newItems);
+        setItems(newItems as TreeItems<T>);
         onDragEnd?.(result);
       }
     },
@@ -245,7 +245,7 @@ function PrivateSortableTree<T extends TreeItem = TreeItem>({
 
       return setItems((items) =>
         setTreeItemProperties(items, id, (item) => {
-          return { collapsed: !item.collapsed };
+          return { collapsed: !item.collapsed } as T;
         }),
       );
     },

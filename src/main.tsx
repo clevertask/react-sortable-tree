@@ -31,13 +31,16 @@ const App = () => {
 
   const MyCustomTreeItem = (props: RenderItemProps<CustomTreeItem>) => {
     const useSortableTreeGlobalStyles = createSortableTreeGlobalStyles({
-      indicatorColor: 'orange',
-      indicatorBorderColor: 'orange',
+      indicatorColor: 'red',
+      indicatorBorderColor: 'red',
     });
     useSortableTreeGlobalStyles();
-
+    console.log(props.dataSlots.dropZone['data-clone']);
     return (
-      <TreeItemStructure {...props}>
+      <TreeItemStructure
+        {...props}
+        draggableItemStyle={{ background: 'violet', display: 'flex', border: '1px solid yellow' }}
+      >
         <Handle {...props.dragListeners} />
         <p>{props.treeItem.label}</p>
       </TreeItemStructure>

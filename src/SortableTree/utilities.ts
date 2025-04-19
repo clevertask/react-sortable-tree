@@ -118,38 +118,41 @@ export function findItemDeep(items: TreeItems, itemId: UniqueIdentifier): TreeIt
   return item;
 }
 
-export function removeItemById(items: TreeItems, id: UniqueIdentifier): TreeItems {
-  function removeFromChildren(children: TreeItems): TreeItems {
+export function removeItemById<T extends TreeItem>(
+  items: TreeItems<T>,
+  id: UniqueIdentifier,
+): TreeItems<T> {
+  function removeFromChildren(children: TreeItems<T>): TreeItems<T> {
     return children
       .filter((child) => child.id !== id)
       .map((child) => ({
         ...child,
-        children: removeFromChildren(child.children || []),
+        children: removeFromChildren((child.children as TreeItems<T>) || []),
       }));
   }
   const newItems = removeFromChildren(items);
   return newItems;
 }
 
-export function setTreeItemProperties(
-  items: TreeItems,
+export function setTreeItemProperties<T extends TreeItem>(
+  items: TreeItems<T>,
   id: UniqueIdentifier,
-  setter: (value: TreeItem) => Partial<TreeItem>,
-): TreeItems {
-  function updateItemInTree(items: TreeItems): TreeItems {
+  setter: (value: T) => Partial<T>,
+): TreeItems<T> {
+  function updateItemInTree(items: TreeItems<T>): TreeItems<T> {
     return items.map((item) => {
       if (item.id === id) {
         const updatedItem = { ...item, ...setter(item) };
 
         if (updatedItem.children && updatedItem.children.length > 0) {
-          updatedItem.children = updateItemInTree(updatedItem.children);
+          updatedItem.children = updateItemInTree(updatedItem.children as TreeItems<T>);
         }
 
         return updatedItem;
       } else if (item.children && item.children.length > 0) {
         return {
           ...item,
-          children: updateItemInTree(item.children),
+          children: updateItemInTree(item.children as TreeItems<T>),
         };
       } else {
         return item;
@@ -169,12 +172,15 @@ export function setTreeItemProperties(
  * @param id The unique identifier of the item to retrieve.
  * @returns The tree item if found, undefined otherwise.
  */
-export function getItemById(items: TreeItems, id: UniqueIdentifier): TreeItem | undefined {
+export function getItemById<T extends TreeItem>(
+  items: TreeItems<T>,
+  id: UniqueIdentifier,
+): TreeItem<T> | undefined {
   for (const item of items) {
     if (item.id === id) {
       return item;
     } else if (item.children && item.children.length > 0) {
-      const foundItem = getItemById(item.children, id);
+      const foundItem = getItemById(item.children as TreeItems<T>, id);
       if (foundItem) {
         return foundItem;
       }

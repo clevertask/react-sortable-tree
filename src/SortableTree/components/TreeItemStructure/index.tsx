@@ -1,7 +1,8 @@
 export interface TreeItemStructureProps {
   dropZoneRef: (element: HTMLElement | null) => void;
   draggableItemRef: React.Ref<any>;
-  layoutStyle?: React.CSSProperties;
+  dropZoneStyle?: React.CSSProperties;
+  draggableItemStyle?: React.CSSProperties;
   classNames?: {
     dropZone?: string;
     draggableItem?: string;
@@ -11,7 +12,7 @@ export interface TreeItemStructureProps {
   draggableItemProps?: Record<string, any>;
   children?: React.ReactNode;
   dataSlots: {
-    dropZone: Record<string, boolean | undefined>;
+    dropZone: Record<string, string | boolean | undefined>;
     draggableItem: Record<string, string>;
   };
 }
@@ -19,7 +20,8 @@ export interface TreeItemStructureProps {
 export const TreeItemStructure = ({
   dropZoneRef,
   draggableItemRef,
-  layoutStyle,
+  dropZoneStyle,
+  draggableItemStyle,
   classNames = {},
   asDropZone: DropZoneComponent = 'div',
   asDraggableItem: DraggableComponent = 'div',
@@ -31,13 +33,14 @@ export const TreeItemStructure = ({
     <DropZoneComponent
       ref={dropZoneRef}
       className={classNames.dropZone}
-      style={layoutStyle}
+      style={dropZoneStyle}
       {...dataSlots.dropZone}
     >
       {children ?
         <DraggableComponent
           ref={draggableItemRef}
           className={classNames.draggableItem}
+          style={draggableItemStyle}
           {...dataSlots.draggableItem}
         >
           {children}

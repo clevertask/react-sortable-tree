@@ -11,7 +11,7 @@ import { TreeItem as TTreeItem } from '../../types';
 export interface RenderItemProps<T extends TTreeItem = TTreeItem>
   extends Pick<
       TreeItemStructureProps,
-      'classNames' | 'layoutStyle' | 'dropZoneRef' | 'draggableItemRef'
+      'classNames' | 'dropZoneStyle' | 'dropZoneRef' | 'draggableItemRef'
     >,
     Pick<
       Props,
@@ -27,7 +27,7 @@ export interface RenderItemProps<T extends TTreeItem = TTreeItem>
   dragListeners?: any;
   treeItem: T;
   dataSlots: {
-    dropZone: Record<string, boolean | undefined>;
+    dropZone: Record<string, string | boolean | undefined>;
     draggableItem: Record<string, string>;
   };
 }
@@ -87,6 +87,7 @@ export const _TreeItem = forwardRef<HTMLDivElement, Props>(
           treeItem: value,
           dataSlots: {
             dropZone: {
+              'data-slot': 'dropZone',
               'data-clone': clone,
               'data-ghost': ghost,
               'data-indicator': indicator,
@@ -97,7 +98,7 @@ export const _TreeItem = forwardRef<HTMLDivElement, Props>(
               'data-slot': 'draggableItem',
             },
           },
-          layoutStyle: {
+          dropZoneStyle: {
             paddingLeft: `${indentationWidth * depth}px`,
             ...style,
           },
