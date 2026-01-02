@@ -8,13 +8,24 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v5
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
         with:
-          node-version-file: '.nvmrc'
+          node-version-file: .nvmrc
           registry-url: 'https://registry.npmjs.org'
-      - run: npm ci
-      - run: npm run build
+
+      - name: Install pnpm
+        run: npm install -g pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build lib
+        run: pnpm build
+
+      - name: Publish lib
       - run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
