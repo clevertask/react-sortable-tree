@@ -1,3 +1,9 @@
+type AriaProps = {
+  'aria-label'?: string;
+  'aria-labelledby'?: string;
+  'aria-describedby'?: string;
+};
+
 export interface TreeItemStructureProps {
   dropZoneRef: (element: HTMLElement | null) => void;
   draggableItemRef: React.Ref<any>;
@@ -9,11 +15,10 @@ export interface TreeItemStructureProps {
   };
   asDropZone?: React.ElementType;
   asDraggableItem?: React.ElementType;
-  draggableItemProps?: Record<string, any>;
   children?: React.ReactNode;
   dataSlots: {
-    dropZone: Record<string, string | boolean | undefined>;
-    draggableItem: Record<string, string>;
+    dropZone?: AriaProps & Record<string, string | boolean | number | undefined>;
+    draggableItem?: AriaProps & Record<string, string>;
   };
 }
 
@@ -25,32 +30,27 @@ export const TreeItemStructure = ({
   classNames = {},
   asDropZone: DropZoneComponent = 'div',
   asDraggableItem: DraggableComponent = 'div',
-  draggableItemProps,
   children,
   dataSlots,
 }: TreeItemStructureProps) => {
   return (
     <DropZoneComponent
-      ref={dropZoneRef}
       className={classNames.dropZone}
       style={dropZoneStyle}
       {...dataSlots.dropZone}
+      ref={dropZoneRef}
+      role="region"
+      aria-roledescription="drop zone"
     >
-      {children ?
-        <DraggableComponent
-          ref={draggableItemRef}
-          className={classNames.draggableItem}
-          style={draggableItemStyle}
-          {...dataSlots.draggableItem}
-        >
-          {children}
-        </DraggableComponent>
-      : <DraggableComponent
-          ref={draggableItemRef}
-          className={classNames.draggableItem}
-          {...draggableItemProps}
-        />
-      }
+      <DraggableComponent
+        className={classNames.draggableItem}
+        style={draggableItemStyle}
+        {...dataSlots.draggableItem}
+        role="treeitem"
+        ref={draggableItemRef}
+      >
+        {children}
+      </DraggableComponent>
     </DropZoneComponent>
   );
 };

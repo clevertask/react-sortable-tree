@@ -327,65 +327,69 @@ function PrivateSortableTree<T extends TreeItem = TreeItem>({
   };
 
   return (
-    <DndContext
-      accessibility={{ announcements }}
-      sensors={sensors}
-      collisionDetection={closestCenter}
-      measuring={measuring}
-      onDragStart={handleDragStart}
-      onDragMove={handleDragMove}
-      onDragOver={handleDragOver}
-      onDragEnd={handleDragEnd}
-      onDragCancel={handleDragCancel}
-    >
-      <SortableContext items={sortedIds} strategy={verticalListSortingStrategy}>
-        {flattenedItems.map((item) => {
-          const { id, children, collapsed, depth, canFetchChildren, disableDragging } = item;
-          return (
-            <SortableTreeItem
-              key={id}
-              id={id}
-              value={item}
-              disableDragging={Boolean(disableDragging)}
-              depth={id === activeId && projected ? projected.depth : depth}
-              indentationWidth={indentationWidth}
-              indicator={showDropIndicator}
-              collapsed={Boolean(collapsed && (children.length || canFetchChildren))}
-              onCollapse={
-                isCollapsible && (children.length || canFetchChildren) ?
-                  () => handleCollapse({ id, canFetchChildren, collapsed })
-                : undefined
-              }
-              onRemove={
-                isRemovable ? () => (onRemoveItem ? onRemoveItem(id) : handleRemove(id)) : undefined
-              }
-              onAdd={allowNestedItemAddition ? () => onAddItem?.(id) : undefined}
-              onLabelClick={onItemClick ? () => onItemClick(id) : undefined}
-              renderItem={renderItem}
-            />
-          );
-        })}
-        {createPortal(
-          <DragOverlay
-            dropAnimation={dropAnimationConfig}
-            modifiers={showDropIndicator ? [adjustTranslate] : undefined}
-          >
-            {activeId && activeItem ?
+    <div role="tree">
+      <DndContext
+        accessibility={{ announcements }}
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        measuring={measuring}
+        onDragStart={handleDragStart}
+        onDragMove={handleDragMove}
+        onDragOver={handleDragOver}
+        onDragEnd={handleDragEnd}
+        onDragCancel={handleDragCancel}
+      >
+        <SortableContext items={sortedIds} strategy={verticalListSortingStrategy}>
+          {flattenedItems.map((item) => {
+            const { id, children, collapsed, depth, canFetchChildren, disableDragging } = item;
+            return (
               <SortableTreeItem
-                id={activeId}
-                depth={activeItem.depth}
-                clone
-                childCount={getChildCount(items, activeId) + 1}
-                value={activeItem}
+                key={id}
+                id={id}
+                value={item}
+                disableDragging={Boolean(disableDragging)}
+                depth={id === activeId && projected ? projected.depth : depth}
                 indentationWidth={indentationWidth}
+                indicator={showDropIndicator}
+                collapsed={Boolean(collapsed && (children.length || canFetchChildren))}
+                onCollapse={
+                  isCollapsible && (children.length || canFetchChildren) ?
+                    () => handleCollapse({ id, canFetchChildren, collapsed })
+                  : undefined
+                }
+                onRemove={
+                  isRemovable ?
+                    () => (onRemoveItem ? onRemoveItem(id) : handleRemove(id))
+                  : undefined
+                }
+                onAdd={allowNestedItemAddition ? () => onAddItem?.(id) : undefined}
+                onLabelClick={onItemClick ? () => onItemClick(id) : undefined}
                 renderItem={renderItem}
               />
-            : null}
-          </DragOverlay>,
-          document.body,
-        )}
-      </SortableContext>
-    </DndContext>
+            );
+          })}
+          {createPortal(
+            <DragOverlay
+              dropAnimation={dropAnimationConfig}
+              modifiers={showDropIndicator ? [adjustTranslate] : undefined}
+            >
+              {activeId && activeItem ?
+                <SortableTreeItem
+                  id={activeId}
+                  depth={activeItem.depth}
+                  clone
+                  childCount={getChildCount(items, activeId) + 1}
+                  value={activeItem}
+                  indentationWidth={indentationWidth}
+                  renderItem={renderItem}
+                />
+              : null}
+            </DragOverlay>,
+            document.body,
+          )}
+        </SortableContext>
+      </DndContext>
+    </div>
   );
 }
 

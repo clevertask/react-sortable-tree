@@ -35,11 +35,16 @@ const App = () => {
       indicatorBorderColor: 'red',
     });
     useSortableTreeGlobalStyles();
-    console.log(props.dataSlots.dropZone['data-clone']);
+
     return (
       <TreeItemStructure
         {...props}
         draggableItemStyle={{ background: 'violet', display: 'flex', border: '1px solid yellow' }}
+        dataSlots={{
+          dropZone: {
+            'aria-label': `Drop inside ${props.treeItem.label}`,
+          },
+        }}
       >
         <Handle {...props.dragListeners} />
         <p>{props.treeItem.label}</p>
