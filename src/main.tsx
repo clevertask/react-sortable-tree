@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { createRoot } from 'react-dom/client';
+import { StrictMode, useState } from 'react';
 import { Handle } from './SortableTree/components/Handle';
 import {
   createSortableTreeGlobalStyles,
@@ -14,26 +15,19 @@ type CustomTreeItem = TreeItem<{
   description?: string;
   metadata?: Record<string, any>;
 }>;
+type MyTreeItem = TreeItems<CustomTreeItem>;
 
-export type MyTreeItem = TreeItems<CustomTreeItem>;
-
-export const App = ({ initialItems }: { initialItems?: MyTreeItem }) => {
-  const [treeItems, setTreeItems] = useState<MyTreeItem>(
-    initialItems || [
-      { id: '1', label: 'Hello', children: [], metadata: { a: 'foo' } },
-      {
-        id: '2',
-        label: 'World',
-        children: [
-          {
-            id: '2.2',
-            label: 'Hello world!',
-            children: [{ id: '2.2.2', label: 'a', children: [] }],
-          },
-        ],
-      },
-    ],
-  );
+const App = () => {
+  const [treeItems, setTreeItems] = useState<MyTreeItem>([
+    { id: '1', label: 'Hello', children: [], metadata: { a: 'foo' } },
+    {
+      id: '2',
+      label: 'World',
+      children: [
+        { id: '2.2', label: 'Hello world!', children: [{ id: '2.2.2', label: 'a', children: [] }] },
+      ],
+    },
+  ]);
 
   const MyCustomTreeItem = (props: RenderItemProps<CustomTreeItem>) => {
     const useSortableTreeGlobalStyles = createSortableTreeGlobalStyles({
@@ -68,3 +62,15 @@ export const App = ({ initialItems }: { initialItems?: MyTreeItem }) => {
     />
   );
 };
+
+const rootElement = document.getElementById('root');
+
+if (rootElement) {
+  createRoot(rootElement).render(
+    <StrictMode>
+      <App />
+    </StrictMode>,
+  );
+} else {
+  console.error('Root element not found');
+}
