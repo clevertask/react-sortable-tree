@@ -11,8 +11,8 @@
   "types": "./dist/index.d.ts",
   "scripts": {
     "dev": "vite",
-    "e2e": "pnpm exec playwright test",
-    "e2e:dev": "pnpm exec playwright test --ui",
+    "e2e": "playwright test",
+    "e2e:dev": "playwright test --ui",
     "build": "rm -rf dist && vite build",
     "lint": "eslint .",
     "format": "prettier --write",

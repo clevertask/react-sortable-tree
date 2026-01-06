@@ -39,14 +39,12 @@ export const TreeItemStructure = ({
       style={dropZoneStyle}
       {...dataSlots.dropZone}
       ref={dropZoneRef}
-      role="region"
-      aria-roledescription="drop zone"
+      role="treeitem"
     >
       <DraggableComponent
         className={classNames.draggableItem}
         style={draggableItemStyle}
         {...dataSlots.draggableItem}
-        role="treeitem"
         ref={draggableItemRef}
       >
         {children}
