@@ -36,7 +36,6 @@ const App = () => {
       indicatorBorderColor: 'red',
     });
     useSortableTreeGlobalStyles();
-
     return (
       <TreeItemStructure
         {...props}
@@ -44,9 +43,11 @@ const App = () => {
         dataSlots={{
           dropZone: {
             'aria-label': props.treeItem.label,
+            parent: props.treeItem.parent?.label,
           },
         }}
       >
+        {/*TODO: Make a component to inject the handler listeners so the dev only worries about the markup stuff*/}
         <Handle aria-label={`Drag ${props.treeItem.label}`} {...props.dragListeners} />
         <p>{props.treeItem.label}</p>
       </TreeItemStructure>
