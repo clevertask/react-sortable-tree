@@ -25,6 +25,7 @@ const BASE_TREE = [
     children: [{ id: 'b1', label: 'B1', children: [] }],
   },
   { id: 'c', label: 'C', children: [] },
+  { id: 'd', label: 'D', children: [] },
 ];
 
 const App = () => {
