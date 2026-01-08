@@ -1,6 +1,6 @@
 import { Page, expect } from '@playwright/test';
 
-type DragPosition = 'top' | 'bottom' | 'inside';
+type DragPosition = 'before' | 'after' | 'inside';
 
 interface DragItemOptions {
   page: Page;
@@ -31,11 +31,11 @@ export async function dragItem({ page, from, to }: DragItemOptions) {
   const PADDING_Y = 4; // avoids border edge cases
 
   switch (to.position) {
-    case 'top':
+    case 'before':
       endY = targetBox.y + PADDING_Y;
       break;
 
-    case 'bottom':
+    case 'after':
       endY = targetBox.y + targetBox.height - PADDING_Y;
       break;
 
@@ -60,5 +60,7 @@ export async function dragItem({ page, from, to }: DragItemOptions) {
   await page.mouse.move(startX + 1, startY + 1);
 
   await page.mouse.move(endX, endY, { steps: 10 });
+
+  await page.evaluate(() => new Promise(requestAnimationFrame));
   await page.mouse.up();
 }

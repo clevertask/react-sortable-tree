@@ -36,7 +36,7 @@ test('Item A is moved below C after drag and drop', async ({ page }) => {
   await dragItem({
     page,
     from: { name: 'A' },
-    to: { name: 'C', position: 'bottom' },
+    to: { name: 'C', position: 'after' },
   });
 
   const allItems = page.getByRole('treeitem');
@@ -46,8 +46,6 @@ test('Item A is moved below C after drag and drop', async ({ page }) => {
   const indexA = texts.indexOf('A');
 
   expect(indexA).toBe(indexC + 1);
-
-  // Extra safety: ensure A is NOT nested
   await expect(taskA).not.toHaveAttribute('data-tree-item-parent-id', 'c');
 });
 
@@ -63,7 +61,7 @@ test('Item C is moved before A after drag and drop', async ({ page }) => {
   await dragItem({
     page,
     from: { name: 'C' },
-    to: { name: 'A', position: 'top' },
+    to: { name: 'A', position: 'before' },
   });
 
   const allItems = page.getByRole('treeitem');
@@ -73,7 +71,5 @@ test('Item C is moved before A after drag and drop', async ({ page }) => {
   const indexA = texts.indexOf('A');
 
   expect(indexC).toBe(indexA - 1);
-
-  // Extra safety: ensure C is NOT nested
   await expect(taskC).not.toHaveAttribute('data-tree-item-parent-id', 'a');
 });
