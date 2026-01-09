@@ -40,7 +40,7 @@ export async function dragItem({ page, from, to }: DragItemOptions) {
       break;
 
     case 'inside': {
-      const draggable = targetItem.locator('[data-cypress="draggable-handle"]').locator('..'); //TODO: Create an aria-label or data property for this
+      const draggable = targetItem.locator('[data-tree-draggable]');
       const draggableBox = await draggable.boundingBox();
 
       if (!draggableBox) {
