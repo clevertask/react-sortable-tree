@@ -61,7 +61,8 @@ export const TreeItemStructure = ({
       className={classNames.dropZone}
       style={dropZoneStyle}
       {...dropZoneAria}
-      data-tree-item-parent-id={treeItem.parentId}
+      {...(treeItem.parentId ? { 'data-tree-item-parent-id': treeItem.parentId } : null)}
+      data-tree-item-id={treeItem.id}
       ref={dropZoneRef}
     >
       <DragContext.Provider

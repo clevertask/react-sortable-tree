@@ -1,14 +1,15 @@
-import { Page, expect } from '@playwright/test';
+import type { Page, Expect } from '@playwright/test';
 
 type DragPosition = 'before' | 'after' | 'inside';
 
 interface DragItemOptions {
   page: Page;
+  expect: Expect;
   from: { name: string };
   to: { name: string; position: DragPosition };
 }
 
-export async function dragItem({ page, from, to }: DragItemOptions) {
+export async function dragItem({ page, expect, from, to }: DragItemOptions) {
   const fromHandle = page.getByLabel(`Drag ${from.name}`, { exact: true });
   const targetItem = page.getByRole('treeitem', { name: to.name });
 

@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { dragItem } from './drag-item';
+import { dragItem, getTreeItemId } from './utils';
 
 test.afterEach(async ({ page }) => {
   await page.reload();
@@ -10,6 +10,7 @@ test('Item A becomes a child of C after drag and drop', async ({ page }) => {
 
   const taskADragButton = page.getByLabel('Drag A', { exact: true });
   const taskC = page.getByRole('treeitem', { name: 'C' });
+  const taskCId = await getTreeItemId(taskC);
 
   await expect(taskADragButton).toBeVisible();
   await expect(taskC).toBeVisible();
@@ -21,7 +22,7 @@ test('Item A becomes a child of C after drag and drop', async ({ page }) => {
   });
 
   const nestedA = page.getByRole('treeitem', { name: 'A' });
-  await expect(nestedA).toHaveAttribute('data-tree-item-parent-id', 'c');
+  await expect(nestedA).toHaveAttribute('data-tree-item-parent-id', taskCId);
 });
 
 test('Item A is moved below C after drag and drop', async ({ page }) => {
@@ -29,6 +30,7 @@ test('Item A is moved below C after drag and drop', async ({ page }) => {
 
   const taskA = page.getByRole('treeitem', { name: 'A' });
   const taskC = page.getByRole('treeitem', { name: 'C' });
+  const taskCId = await getTreeItemId(taskC);
 
   await expect(taskA).toBeVisible();
   await expect(taskC).toBeVisible();
@@ -46,7 +48,7 @@ test('Item A is moved below C after drag and drop', async ({ page }) => {
   const indexA = texts.indexOf('A');
 
   expect(indexA).toBe(indexC + 1);
-  await expect(taskA).not.toHaveAttribute('data-tree-item-parent-id', 'c');
+  await expect(taskA).not.toHaveAttribute('data-tree-item-parent-id', taskCId);
 });
 
 test('Item C is moved before A after drag and drop', async ({ page }) => {
@@ -54,6 +56,7 @@ test('Item C is moved before A after drag and drop', async ({ page }) => {
 
   const taskC = page.getByRole('treeitem', { name: 'C' });
   const taskA = page.getByRole('treeitem', { name: 'A' });
+  const taskAId = await getTreeItemId(taskA);
 
   await expect(taskC).toBeVisible();
   await expect(taskA).toBeVisible();
@@ -71,5 +74,5 @@ test('Item C is moved before A after drag and drop', async ({ page }) => {
   const indexA = texts.indexOf('A');
 
   expect(indexC).toBe(indexA - 1);
-  await expect(taskC).not.toHaveAttribute('data-tree-item-parent-id', 'a');
+  await expect(taskC).not.toHaveAttribute('data-tree-item-parent-id', taskAId);
 });
