@@ -34,4 +34,4 @@ jobs:
         run: pnpm build
 
       - name: Publish lib
-        run: npm publish
+        run: pnpm publish
