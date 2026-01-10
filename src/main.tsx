@@ -17,36 +17,36 @@ type CustomTreeItem = TreeItem<{
 }>;
 type MyTreeItem = TreeItems<CustomTreeItem>;
 
+const BASE_TREE = [
+  { id: 'a', label: 'A', children: [] },
+  {
+    id: 'b',
+    label: 'B',
+    children: [{ id: 'b1', label: 'B1', children: [] }],
+  },
+  { id: 'c', label: 'C', children: [] },
+  { id: 'd', label: 'D', children: [] },
+];
+
 const App = () => {
-  const [treeItems, setTreeItems] = useState<MyTreeItem>([
-    { id: '1', label: 'Hello', children: [], metadata: { a: 'foo' } },
-    {
-      id: '2',
-      label: 'World',
-      children: [
-        { id: '2.2', label: 'Hello world!', children: [{ id: '2.2.2', label: 'a', children: [] }] },
-      ],
-    },
-  ]);
+  const [treeItems, setTreeItems] = useState<MyTreeItem>(BASE_TREE);
 
   const MyCustomTreeItem = (props: RenderItemProps<CustomTreeItem>) => {
     const useSortableTreeGlobalStyles = createSortableTreeGlobalStyles({
       indicatorColor: 'red',
       indicatorBorderColor: 'red',
     });
+
     useSortableTreeGlobalStyles();
 
     return (
       <TreeItemStructure
         {...props}
         draggableItemStyle={{ background: 'violet', display: 'flex', border: '1px solid yellow' }}
-        dataSlots={{
-          dropZone: {
-            'aria-label': `Drop inside ${props.treeItem.label}`,
-          },
-        }}
       >
-        <Handle {...props.dragListeners} />
+        <TreeItemStructure.DragHandler>
+          <Handle />
+        </TreeItemStructure.DragHandler>
         <p>{props.treeItem.label}</p>
       </TreeItemStructure>
     );

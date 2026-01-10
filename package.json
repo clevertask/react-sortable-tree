@@ -7,13 +7,29 @@
   "files": [
     "dist"
   ],
-  "main": "./dist/react-sortable-tree.js",
-  "types": "./dist/index.d.ts",
+  "homepage": "https://github.com/clevertask/react-sortable-tree#readme",
+  "bugs": {
+    "url": "https://github.com/clevertask/react-sortable-tree/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/clevertask/react-sortable-tree"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "default": "./dist/react-sortable-tree.js"
+    },
+    "./e2e": {
+      "types": "./dist/e2e/utils/index.d.ts",
+      "default": "./dist/e2e/index.js"
+    }
+  },
   "scripts": {
     "dev": "vite",
-    "e2e": "pnpm exec playwright test",
-    "e2e:dev": "pnpm exec playwright test --ui",
-    "build": "rm -rf dist && vite build",
+    "e2e": "playwright test",
+    "e2e:dev": "playwright test --ui",
+    "build": "rm -rf dist && vite build && vite build -c vite.test.config.ts",
     "lint": "eslint .",
     "format": "prettier --write",
     "preview": "vite preview",
