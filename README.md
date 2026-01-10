@@ -368,7 +368,7 @@ await expectItemNotToBeChildOf(expect, taskA, taskC);
 
 ### expectItemBefore
 
-This helper tells you if an item is before "x" item. You don't need a function for after because it's a matter of targeting the items on their right places.
+This helper tells you if an item is before the "x" item. You don't need a function for after because it's a matter of targeting the items in their proper places.
 
 ```ts
 await expectItemBefore(page, expect, 'C', 'A');
@@ -379,7 +379,7 @@ await expectItemBefore(page, expect, 'C', 'A');
 ## Roadmap
 
 - ✅ Custom item rendering (done!)
-- ✅ E2E tests: It's partially done. We have yet to add item expanding tests and future tests for the next stuff we plan to add)
+- ✅ E2E tests: It's partially done. We have yet to add item expanding tests and future tests for the next stuff we plan to add
 - 🔜 Virtualization for large trees
 - 🔜 Multi-selection support
 - 🔜 Drag multiple items
