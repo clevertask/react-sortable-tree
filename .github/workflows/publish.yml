@@ -1,11 +1,19 @@
-name: Publish to npm
+name: Publish Package
 
 on:
+  workflow_dispatch:
   release:
     types: [created]
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  id-token: write # Required for OIDC
+  contents: read
 
 jobs:
-  build:
+  publish:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -26,6 +34,4 @@ jobs:
         run: pnpm build
 
       - name: Publish lib
-        run: npm publish
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: pnpm publish
