@@ -11,7 +11,12 @@ interface DragItemOptions {
 
 export async function dragItem({ page, expect, from, to }: DragItemOptions) {
   const fromHandle = page.getByLabel(`Drag ${from.name}`, { exact: true });
-  const targetItem = page.getByRole('treeitem', { name: to.name });
+  const targetItem = page
+    .getByRole('treeitem', {
+      name: to.name,
+      exact: true,
+    })
+    .locator('[data-tree-draggable]');
 
   await expect(fromHandle).toBeVisible();
   await expect(targetItem).toBeVisible();
@@ -31,25 +36,52 @@ export async function dragItem({ page, expect, from, to }: DragItemOptions) {
 
   const PADDING_Y = 4; // avoids border edge cases
 
-  switch (to.position) {
-    case 'before':
-      endY = targetBox.y + PADDING_Y;
-      break;
+  const draggingUp = fromBox.y > targetBox.y;
 
-    case 'after':
-      endY = targetBox.y + targetBox.height - PADDING_Y;
+  switch (to.position) {
+    case 'before': {
+      endY = targetBox.y + PADDING_Y;
+
+      if (draggingUp) {
+        endY += fromBox.height;
+      }
+
       break;
+    }
+
+    case 'after': {
+      endY = targetBox.y + targetBox.height - PADDING_Y;
+
+      if (draggingUp) {
+        endY += fromBox.height;
+      }
+
+      break;
+    }
 
     case 'inside': {
-      const draggable = targetItem.locator('[data-tree-draggable]');
-      const draggableBox = await draggable.boundingBox();
+      const draggableBox = await targetItem.boundingBox();
 
       if (!draggableBox) {
         throw new Error('Could not determine draggable item bounds');
       }
+      console.log(draggingUp);
 
-      endX = draggableBox.x + draggableBox.width * 0.05;
-      endY = draggableBox.y + draggableBox.height * 0.75;
+      endX = draggableBox.x + draggableBox.width * 0.25;
+
+      if (draggingUp) {
+        /**
+         * When moving from bottom to top. Dnd will move the item before once the dragged item top edge
+         * touches the middle or the bottom edge of the target container, so we need to move it
+         * before it touches the bottom edge to specify we're putting it after
+         */
+        const result = draggableBox.y + draggableBox.height * 2;
+        endY = result;
+      } else {
+        const result = draggableBox.y + draggableBox.height * 0.75;
+        endY = result;
+      }
+
       break;
     }
   }
@@ -63,5 +95,8 @@ export async function dragItem({ page, expect, from, to }: DragItemOptions) {
   await page.mouse.move(endX, endY, { steps: 10 });
 
   await page.evaluate(() => new Promise(requestAnimationFrame));
+  await page.waitForTimeout(120);
   await page.mouse.up();
+  await page.waitForTimeout(120);
+  await expect(fromHandle).toHaveCount(1);
 }
