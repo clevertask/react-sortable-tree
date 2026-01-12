@@ -1,4 +1,5 @@
 import type { Page, Expect } from '@playwright/test';
+import { getTreeItem } from './get-tree-item';
 
 type DragPosition = 'before' | 'after' | 'inside';
 
@@ -11,12 +12,7 @@ interface DragItemOptions {
 
 export async function dragItem({ page, expect, from, to }: DragItemOptions) {
   const fromHandle = page.getByLabel(`Drag ${from.name}`, { exact: true });
-  const targetItem = page
-    .getByRole('treeitem', {
-      name: to.name,
-      exact: true,
-    })
-    .locator('[data-tree-draggable]');
+  const targetItem = getTreeItem(page, to.name).locator('[data-tree-draggable]');
 
   await expect(fromHandle).toBeVisible();
   await expect(targetItem).toBeVisible();
@@ -36,6 +32,11 @@ export async function dragItem({ page, expect, from, to }: DragItemOptions) {
 
   const PADDING_Y = 4; // avoids border edge cases
 
+  /**
+   * When moving from bottom to top. Dnd will move the item before once the dragged item top edge
+   * touches the middle or the bottom edge of the target container, so we need to move it
+   * before it touches the bottom edge to specify we're putting it after
+   */
   const draggingUp = fromBox.y > targetBox.y;
 
   switch (to.position) {
@@ -65,16 +66,10 @@ export async function dragItem({ page, expect, from, to }: DragItemOptions) {
       if (!draggableBox) {
         throw new Error('Could not determine draggable item bounds');
       }
-      console.log(draggingUp);
 
       endX = draggableBox.x + draggableBox.width * 0.25;
 
       if (draggingUp) {
-        /**
-         * When moving from bottom to top. Dnd will move the item before once the dragged item top edge
-         * touches the middle or the bottom edge of the target container, so we need to move it
-         * before it touches the bottom edge to specify we're putting it after
-         */
         const result = draggableBox.y + draggableBox.height * 2;
         endY = result;
       } else {
