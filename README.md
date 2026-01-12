@@ -369,6 +369,11 @@ await expectItemNotToBeChildOf(expect, taskA, taskC);
 ### expectItemBefore
 
 This helper tells you if an item is before the "x" item. You don't need a function for after because it's a matter of targeting the items in their proper places.
+⚠️ You must add a `data-tree-item-label` to your HTML element that contains the tree label
+
+```tsx
+<p data-tree-item-label>{props.treeItem.label}</p>
+```
 
 ```ts
 await expectItemBefore(page, expect, 'C', 'A');

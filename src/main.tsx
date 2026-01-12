@@ -26,6 +26,7 @@ const BASE_TREE = [
   },
   { id: 'c', label: 'C', children: [] },
   { id: 'd', label: 'D', children: [] },
+  { id: 'e', label: 'E', children: [] },
 ];
 
 const App = () => {
@@ -47,7 +48,8 @@ const App = () => {
         <TreeItemStructure.DragHandler>
           <Handle />
         </TreeItemStructure.DragHandler>
-        <p>{props.treeItem.label}</p>
+
+        <p data-tree-item-label>{props.treeItem.label}</p>
       </TreeItemStructure>
     );
   };
