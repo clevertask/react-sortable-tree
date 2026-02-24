@@ -23,6 +23,7 @@ import { SortableContext, arrayMove, verticalListSortingStrategy } from '@dnd-ki
 
 import {
   buildTree,
+  convertTreeToFlatItems,
   flattenTree,
   getProjection,
   getChildCount,
@@ -33,6 +34,7 @@ import {
 import type {
   DropResult,
   FlattenedItem,
+  FlatTreeItems,
   SensorContext,
   SortableTreeProps,
   TreeItem,
@@ -71,6 +73,12 @@ const dropAnimationConfig: DropAnimation = {
   },
 };
 
+function buildTreeFromFlatItems<T extends TreeItem = TreeItem>(
+  items: FlatTreeItems<T>,
+): TreeItems<T> {
+  return buildTree(items as unknown as FlattenedItem[]);
+}
+
 function PrivateSortableTree<T extends TreeItem = TreeItem>({
   items,
   setItems,
@@ -94,8 +102,16 @@ function PrivateSortableTree<T extends TreeItem = TreeItem>({
     overId: UniqueIdentifier;
   } | null>(null);
 
+  const treeItems = useMemo<TreeItems<T>>(() => {
+    return buildTreeFromFlatItems(items);
+  }, [items]);
+
+  const flatItems = useMemo(() => {
+    return flattenTree(treeItems);
+  }, [treeItems]);
+
   const flattenedItems = useMemo(() => {
-    let flattenedTree = flattenTree(items);
+    let flattenedTree = flatItems;
 
     // Disable dragging capabilities if there's just one item at root level
     const rootItems = flattenedTree.filter(({ parentId }) => !parentId);
@@ -124,7 +140,7 @@ function PrivateSortableTree<T extends TreeItem = TreeItem>({
       flattenedTree,
       activeId ? [activeId, ...collapsedItems] : collapsedItems,
     );
-  }, [activeId, items]);
+  }, [activeId, flatItems]);
 
   const projected =
     activeId && overId ?
@@ -150,6 +166,17 @@ function PrivateSortableTree<T extends TreeItem = TreeItem>({
   const sortedIds = useMemo(() => flattenedItems.map(({ id }) => id), [flattenedItems]);
 
   const activeItem = activeId ? flattenedItems.find(({ id }) => id === activeId) : null;
+
+  const setTreeItems = useCallback(
+    (nextItems: TreeItems<T> | ((items: TreeItems<T>) => TreeItems<T>)) => {
+      setItems((prevItems) => {
+        const previousTree = buildTreeFromFlatItems(prevItems);
+        const resolvedItems = typeof nextItems === 'function' ? nextItems(previousTree) : nextItems;
+        return convertTreeToFlatItems(resolvedItems);
+      });
+    },
+    [setItems],
+  );
 
   useEffect(() => {
     sensorContext.current = {
@@ -200,7 +227,7 @@ function PrivateSortableTree<T extends TreeItem = TreeItem>({
 
       if (projected && over) {
         const { depth, parentId } = projected;
-        const clonedItems: FlattenedItem[] = JSON.parse(JSON.stringify(flattenTree(items)));
+        const clonedItems: FlattenedItem[] = JSON.parse(JSON.stringify(flatItems));
         const overIndex = clonedItems.findIndex(({ id }) => id === over.id);
         const activeIndex = clonedItems.findIndex(({ id }) => id === active.id);
         const activeTreeItem = clonedItems[activeIndex];
@@ -211,11 +238,11 @@ function PrivateSortableTree<T extends TreeItem = TreeItem>({
         const newItems = buildTree(sortedItems);
         const result = findItemActualIndex(newItems, clonedItems[activeIndex].id, parentId);
 
-        setItems(newItems as TreeItems<T>);
+        setTreeItems(newItems as TreeItems<T>);
         onDragEnd?.(result);
       }
     },
-    [items, projected, onDragEnd, resetState, setItems],
+    [flatItems, projected, onDragEnd, resetState, setTreeItems],
   );
 
   const handleDragCancel = useCallback(() => {
@@ -224,9 +251,9 @@ function PrivateSortableTree<T extends TreeItem = TreeItem>({
 
   const handleRemove = useCallback(
     (id: UniqueIdentifier) => {
-      setItems((items) => removeItemById(items, id));
+      setTreeItems((items) => removeItemById(items, id));
     },
-    [setItems],
+    [setTreeItems],
   );
 
   const handleCollapse = useCallback(
@@ -243,13 +270,13 @@ function PrivateSortableTree<T extends TreeItem = TreeItem>({
         return onLazyLoadChildren?.(id, Boolean(collapsed));
       }
 
-      return setItems((items) =>
+      return setTreeItems((items) =>
         setTreeItemProperties(items, id, (item) => {
           return { collapsed: !item.collapsed } as T;
         }),
       );
     },
-    [onLazyLoadChildren, setItems],
+    [onLazyLoadChildren, setTreeItems],
   );
 
   const getMovementAnnouncement = useCallback(
@@ -270,7 +297,7 @@ function PrivateSortableTree<T extends TreeItem = TreeItem>({
           }
         }
 
-        const clonedItems: FlattenedItem[] = JSON.parse(JSON.stringify(flattenTree(items)));
+        const clonedItems: FlattenedItem[] = JSON.parse(JSON.stringify(flatItems));
         const overIndex = clonedItems.findIndex(({ id }) => id === overId);
         const activeIndex = clonedItems.findIndex(({ id }) => id === activeId);
         const sortedItems = arrayMove(clonedItems, activeIndex, overIndex);
@@ -305,7 +332,7 @@ function PrivateSortableTree<T extends TreeItem = TreeItem>({
 
       return;
     },
-    [currentPosition, items, projected],
+    [currentPosition, flatItems, projected],
   );
 
   const announcements: Announcements = {
@@ -378,7 +405,7 @@ function PrivateSortableTree<T extends TreeItem = TreeItem>({
                   id={activeId}
                   depth={activeItem.depth}
                   clone
-                  childCount={getChildCount(items, activeId) + 1}
+                  childCount={getChildCount(treeItems, activeId) + 1}
                   value={activeItem}
                   indentationWidth={indentationWidth}
                   renderItem={renderItem}

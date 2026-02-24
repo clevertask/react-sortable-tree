@@ -1,7 +1,7 @@
 import type { UniqueIdentifier } from '@dnd-kit/core';
 import { arrayMove } from '@dnd-kit/sortable';
 
-import type { FlattenedItem, TreeItem, TreeItems } from './types';
+import type { FlatTreeItems, FlattenedItem, TreeItem, TreeItems } from './types';
 
 export const iOS = /iPad|iPhone|iPod/.test(navigator.platform);
 
@@ -90,6 +90,10 @@ function flatten(
 
 export function flattenTree(items: TreeItems): FlattenedItem[] {
   return flatten(items);
+}
+
+export function convertTreeToFlatItems<T extends TreeItem>(items: TreeItems<T>): FlatTreeItems<T> {
+  return flattenTree(items).map(({ children, depth, index, ...rest }) => rest) as FlatTreeItems<T>;
 }
 
 export function buildTree(flattenedItems: FlattenedItem[]): TreeItems {

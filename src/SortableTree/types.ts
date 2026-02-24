@@ -47,6 +47,28 @@ export type BaseTreeItem<ExtraProps = unknown> = {
 
 export type TreeItems<ExtraProps = unknown> = TreeItem<ExtraProps>[];
 
+/**
+ * Represents a flattened tree item that references its parent instead of nesting.
+ */
+export type FlatTreeItem<ExtraProps = unknown> = Omit<TreeItem<ExtraProps>, 'children'> & {
+  /**
+   * The parent id for this item. Use null for root items.
+   */
+  parentId: UniqueIdentifier | null;
+
+  /**
+   * Optional metadata for consumers who already track depth.
+   */
+  depth?: number;
+
+  /**
+   * Optional metadata for consumers who already track index.
+   */
+  index?: number;
+};
+
+export type FlatTreeItems<ExtraProps = unknown> = FlatTreeItem<ExtraProps>[];
+
 export interface FlattenedItem extends TreeItem {
   parentId: UniqueIdentifier | null;
   depth: number;
@@ -68,15 +90,15 @@ export interface SortableTreeProps<T extends TreeItem = TreeItem> {
   indentationWidth?: number;
 
   /**
-   * The array of tree items to be rendered.
+   * The flat array of items to be rendered.
    */
-  items: TreeItems<T>;
+  items: FlatTreeItems<T>;
 
   /**
    * Callback function called when the tree structure changes.
-   * @param items - The updated array of tree items.
+   * @param items - The updated flat array of tree items.
    */
-  setItems: React.Dispatch<React.SetStateAction<TreeItems<T>>>;
+  setItems: React.Dispatch<React.SetStateAction<FlatTreeItems<T>>>;
 
   /**
    * Determines if tree items can be collapsed/expanded.
