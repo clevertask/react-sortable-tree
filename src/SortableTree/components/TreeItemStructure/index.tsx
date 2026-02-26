@@ -1,4 +1,4 @@
-import { TreeItem } from '../../types';
+import { TreeItem, UniqueIdentifier } from '../../types';
 import { RenderItemProps } from '../TreeItem/TreeItem';
 import React, { createContext } from 'react';
 
@@ -9,7 +9,7 @@ type AriaProps = {
 };
 
 export type TreeItemStructureProps = {
-  treeItem: TreeItem & { parentId?: string };
+  treeItem: TreeItem & { parentId?: UniqueIdentifier | null };
   dropZoneRef: (element: HTMLElement | null) => void;
   draggableItemRef: React.Ref<any>;
   dropZoneStyle?: React.CSSProperties;

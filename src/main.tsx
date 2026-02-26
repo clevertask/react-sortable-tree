@@ -5,7 +5,7 @@ import {
   createSortableTreeGlobalStyles,
   SortableTree,
   TreeItem,
-  FlatTreeItems,
+  TreeItems,
   TreeItemStructure,
 } from './index';
 import { RenderItemProps } from './SortableTree/components/TreeItem/TreeItem';
@@ -13,21 +13,18 @@ import { RenderItemProps } from './SortableTree/components/TreeItem/TreeItem';
 type CustomTreeItem = TreeItem<{
   icon?: string;
   description?: string;
-  metadata?: Record<string, any>;
 }>;
-type MyTreeItem = FlatTreeItems<CustomTreeItem>;
+type MyTreeItem = TreeItems<CustomTreeItem>;
 
-const BASE_TREE = [
-  { id: 'a', label: 'A', parentId: null },
-  { id: 'b', label: 'B', parentId: null },
-  { id: 'b1', label: 'B1', parentId: 'b' },
-  { id: 'c', label: 'C', parentId: null },
-  { id: 'd', label: 'D', parentId: null },
-  { id: 'e', label: 'E', parentId: null },
-];
+// const BASE_TREE = [
+//   { id: 'a', label: 'A', parentId: null },
+//   { id: 'b', label: 'B', parentId: null },
+//   { id: 'b1', label: 'B1', parentId: 'b' },
+//   { id: 'c', label: 'C', parentId: null },
+//   { id: 'd', label: 'D', parentId: null },
+//   { id: 'e', label: 'E', parentId: null },
+// ];
 
-/*
-Legacy adapter:
 import { convertTreeToFlatItems } from './index';
 
 const LEGACY_TREE = [
@@ -43,7 +40,6 @@ const LEGACY_TREE = [
 ];
 
 const BASE_TREE = convertTreeToFlatItems(LEGACY_TREE);
-*/
 
 const App = () => {
   const [treeItems, setTreeItems] = useState<MyTreeItem>(BASE_TREE);
@@ -78,6 +74,7 @@ const App = () => {
       items={treeItems}
       setItems={setTreeItems}
       renderItem={MyCustomTreeItem}
+      onDragEnd={(r) => console.log(r)}
     />
   );
 };
