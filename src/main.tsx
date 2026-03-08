@@ -13,11 +13,21 @@ import { RenderItemProps } from './SortableTree/components/TreeItem/TreeItem';
 type CustomTreeItem = TreeItem<{
   icon?: string;
   description?: string;
-  metadata?: Record<string, any>;
 }>;
 type MyTreeItem = TreeItems<CustomTreeItem>;
 
-const BASE_TREE = [
+// const BASE_TREE = [
+//   { id: 'a', label: 'A', parentId: null },
+//   { id: 'b', label: 'B', parentId: null },
+//   { id: 'b1', label: 'B1', parentId: 'b' },
+//   { id: 'c', label: 'C', parentId: null },
+//   { id: 'd', label: 'D', parentId: null },
+//   { id: 'e', label: 'E', parentId: null },
+// ];
+
+import { convertTreeToFlatItems } from './index';
+
+const LEGACY_TREE = [
   { id: 'a', label: 'A', children: [] },
   {
     id: 'b',
@@ -29,8 +39,11 @@ const BASE_TREE = [
   { id: 'e', label: 'E', children: [] },
 ];
 
+const BASE_TREE = convertTreeToFlatItems(LEGACY_TREE);
+
 const App = () => {
   const [treeItems, setTreeItems] = useState<MyTreeItem>(BASE_TREE);
+  console.log(treeItems);
 
   const MyCustomTreeItem = (props: RenderItemProps<CustomTreeItem>) => {
     const useSortableTreeGlobalStyles = createSortableTreeGlobalStyles({
@@ -61,6 +74,7 @@ const App = () => {
       items={treeItems}
       setItems={setTreeItems}
       renderItem={MyCustomTreeItem}
+      onDragEnd={(r) => console.log(r)}
     />
   );
 };

@@ -1,7 +1,7 @@
 import type { UniqueIdentifier } from '@dnd-kit/core';
 import { arrayMove } from '@dnd-kit/sortable';
 
-import type { FlattenedItem, TreeItem, TreeItems } from './types';
+import type { FlattenedItem, TreeItem, TreeItems, TreeItemsWithChildren } from './types';
 
 export const iOS = /iPad|iPhone|iPod/.test(navigator.platform);
 
@@ -76,62 +76,143 @@ function getMinDepth({ nextItem }: { nextItem: FlattenedItem }) {
   return 0;
 }
 
-function flatten(
-  items: TreeItems,
+type ParentId = UniqueIdentifier | null;
+
+function buildChildrenByParentId<T extends TreeItem>(items: TreeItems<T>) {
+  const itemsById = new Map<UniqueIdentifier, T>();
+
+  for (const item of items) {
+    itemsById.set(item.id, item);
+  }
+
+  const childrenByParentId = new Map<ParentId, T[]>();
+  const normalizedParentById = new Map<UniqueIdentifier, ParentId>();
+
+  for (const item of items) {
+    const rawParentId = item.parentId ?? null;
+    const normalizedParentId =
+      rawParentId != null && itemsById.has(rawParentId) && rawParentId !== item.id ?
+        rawParentId
+      : null;
+
+    normalizedParentById.set(item.id, normalizedParentId);
+
+    const siblings = childrenByParentId.get(normalizedParentId);
+    if (siblings) {
+      siblings.push(item);
+    } else {
+      childrenByParentId.set(normalizedParentId, [item]);
+    }
+  }
+
+  return { childrenByParentId, normalizedParentById };
+}
+
+function getDescendantIds<T extends TreeItem>(
+  items: TreeItems<T>,
+  parentIds: UniqueIdentifier[],
+): Set<UniqueIdentifier> {
+  const { childrenByParentId } = buildChildrenByParentId(items);
+  const descendants = new Set<UniqueIdentifier>();
+  const queue = [...parentIds];
+
+  while (queue.length > 0) {
+    const parentId = queue.shift();
+    if (parentId == null) {
+      continue;
+    }
+    const children = childrenByParentId.get(parentId) ?? [];
+    for (const child of children) {
+      if (descendants.has(child.id)) {
+        continue;
+      }
+      descendants.add(child.id);
+      queue.push(child.id);
+    }
+  }
+
+  return descendants;
+}
+
+export function buildFlattenedItems<T extends TreeItem>(items: TreeItems<T>): FlattenedItem<T>[] {
+  const { childrenByParentId, normalizedParentById } = buildChildrenByParentId(items);
+  const flattened: FlattenedItem<T>[] = [];
+  const visited = new Set<UniqueIdentifier>();
+
+  const visit = (parentId: ParentId, depth: number) => {
+    const children = childrenByParentId.get(parentId) ?? [];
+
+    children.forEach((item, index) => {
+      if (visited.has(item.id)) {
+        return;
+      }
+
+      visited.add(item.id);
+      const normalizedParentId = normalizedParentById.get(item.id) ?? null;
+      flattened.push({ ...item, parentId: normalizedParentId, depth, index });
+      visit(item.id, depth + 1);
+    });
+  };
+
+  visit(null, 0);
+
+  // Safety net for cyclic or disconnected graphs.
+  for (const item of items) {
+    if (visited.has(item.id)) {
+      continue;
+    }
+
+    const normalizedParentId = normalizedParentById.get(item.id) ?? null;
+    const siblings = childrenByParentId.get(normalizedParentId) ?? [];
+    const index = siblings.findIndex((sibling) => sibling.id === item.id);
+
+    flattened.push({
+      ...item,
+      parentId: normalizedParentId,
+      depth: 0,
+      index: index >= 0 ? index : 0,
+    });
+    visit(item.id, 1);
+  }
+
+  return flattened;
+}
+
+function flattenLegacyTree<T extends TreeItem>(
+  items: TreeItemsWithChildren<T>,
   parentId: UniqueIdentifier | null = null,
   depth = 0,
-): FlattenedItem[] {
-  return items.reduce<FlattenedItem[]>((acc, item, index) => {
-    acc.push({ ...item, parentId, depth, index });
-    acc.push(...flatten(item.children, item.id, depth + 1));
+): FlattenedItem<T>[] {
+  return items.reduce<FlattenedItem<T>[]>((acc, item, index) => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { children, parentId: _ignoredParentId, ...rest } = item;
+    acc.push({ ...rest, parentId, depth, index });
+    acc.push(...flattenLegacyTree(children, item.id, depth + 1));
     return acc;
   }, []);
 }
 
-export function flattenTree(items: TreeItems): FlattenedItem[] {
-  return flatten(items);
+export function flattenTree<T extends TreeItem>(
+  items: TreeItemsWithChildren<T>,
+): FlattenedItem<T>[] {
+  return flattenLegacyTree(items);
 }
 
-export function buildTree(flattenedItems: FlattenedItem[]): TreeItems {
-  const root: TreeItem = { id: 'root', label: '', children: [] };
-  const nodes: Record<string, TreeItem> = { [root.id]: root };
-  const items = flattenedItems.map((item) => ({ ...item, children: [] }));
-
-  for (const item of items) {
-    const { id, children, label } = item;
-    const parentId = item.parentId ?? root.id;
-    const parent = nodes[parentId] ?? findItem(items, parentId);
-
-    nodes[id] = { id, label, children };
-    parent.children.push(item);
-  }
-
-  return root.children;
-}
-
-export function findItem(items: TreeItem[], itemId: UniqueIdentifier) {
-  return items.find(({ id }) => id === itemId);
-}
-
-export function findItemDeep(items: TreeItems, itemId: UniqueIdentifier): TreeItem | undefined {
-  const item = getItemById(items, itemId);
-  return item;
+export function convertTreeToFlatItems<T extends TreeItem>(
+  items: TreeItemsWithChildren<T>,
+): TreeItems<T> {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  return flattenTree(items).map(({ depth, index, ...rest }) => rest) as TreeItems<T>;
 }
 
 export function removeItemById<T extends TreeItem>(
   items: TreeItems<T>,
   id: UniqueIdentifier,
 ): TreeItems<T> {
-  function removeFromChildren(children: TreeItems<T>): TreeItems<T> {
-    return children
-      .filter((child) => child.id !== id)
-      .map((child) => ({
-        ...child,
-        children: removeFromChildren((child.children as TreeItems<T>) || []),
-      }));
-  }
-  const newItems = removeFromChildren(items);
-  return newItems;
+  const idsToRemove = getDescendantIds(items, [id]);
+  idsToRemove.add(id);
+
+  return items.filter((item) => !idsToRemove.has(item.id));
 }
 
 export function setTreeItemProperties<T extends TreeItem>(
@@ -139,31 +220,13 @@ export function setTreeItemProperties<T extends TreeItem>(
   id: UniqueIdentifier,
   setter: (value: T) => Partial<T>,
 ): TreeItems<T> {
-  function updateItemInTree(items: TreeItems<T>): TreeItems<T> {
-    return items.map((item) => {
-      if (item.id === id) {
-        const updatedItem = { ...item, ...setter(item) };
+  return items.map((item) => {
+    if (item.id !== id) {
+      return item;
+    }
 
-        if (updatedItem.children && updatedItem.children.length > 0) {
-          updatedItem.children = updateItemInTree(updatedItem.children as TreeItems<T>);
-        }
-
-        return updatedItem;
-      } else if (item.children && item.children.length > 0) {
-        return {
-          ...item,
-          children: updateItemInTree(item.children as TreeItems<T>),
-        };
-      } else {
-        return item;
-      }
-    });
-  }
-
-  // Start the recursion with the root items
-  const newItems = updateItemInTree(items);
-
-  return newItems;
+    return { ...item, ...setter(item) };
+  });
 }
 
 /**
@@ -176,46 +239,28 @@ export function getItemById<T extends TreeItem>(
   items: TreeItems<T>,
   id: UniqueIdentifier,
 ): TreeItem<T> | undefined {
+  return items.find((item) => item.id === id);
+}
+
+export function getChildCount(items: TreeItems, id: UniqueIdentifier) {
+  return getDescendantIds(items, [id]).size;
+}
+
+export function getChildrenCountById<T extends TreeItem>(items: TreeItems<T>) {
+  const counts = new Map<UniqueIdentifier, number>();
+
   for (const item of items) {
-    if (item.id === id) {
-      return item;
-    } else if (item.children && item.children.length > 0) {
-      const foundItem = getItemById(item.children as TreeItems<T>, id);
-      if (foundItem) {
-        return foundItem;
-      }
+    const parentId = item.parentId;
+    if (parentId == null) {
+      continue;
     }
+    counts.set(parentId, (counts.get(parentId) ?? 0) + 1);
   }
-  return undefined;
-}
 
-function countChildren(items: TreeItem[], count = 0): number {
-  return items.reduce((acc, { children }) => {
-    if (children.length) {
-      return countChildren(children, acc + 1);
-    }
-
-    return acc + 1;
-  }, count);
-}
-
-export function getChildCount(treeStructure: TreeItems, id: UniqueIdentifier) {
-  const item = findItemDeep(treeStructure, id);
-
-  return item ? countChildren(item.children) : 0;
+  return counts;
 }
 
 export function removeChildrenOf(items: FlattenedItem[], ids: UniqueIdentifier[]) {
-  const excludeParentIds = [...ids];
-
-  return items.filter((item) => {
-    if (item.parentId && excludeParentIds.includes(item.parentId)) {
-      if (item.children.length) {
-        excludeParentIds.push(item.id);
-      }
-      return false;
-    }
-
-    return true;
-  });
+  const descendantIds = getDescendantIds(items, ids);
+  return items.filter((item) => !descendantIds.has(item.id));
 }

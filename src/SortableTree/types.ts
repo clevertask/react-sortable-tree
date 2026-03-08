@@ -2,12 +2,10 @@ import type { MutableRefObject } from 'react';
 import type { UniqueIdentifier } from '@dnd-kit/core';
 import { Props } from './components/TreeItem/TreeItem';
 
-export type TreeItem<ExtraProps = unknown> = BaseTreeItem & ExtraProps;
-
 /**
- * Represents an item in the tree structure.
+ * Represents a flat item in the tree structure.
  */
-export type BaseTreeItem<ExtraProps = unknown> = {
+export type BaseTreeItem = {
   /**
    * Unique identifier for the item. Can be a string or number.
    */
@@ -19,9 +17,9 @@ export type BaseTreeItem<ExtraProps = unknown> = {
   label: string;
 
   /**
-   * An array of child TreeItems. If empty, the item is a leaf node.
+   * The parent id for this item. Use null for root items.
    */
-  children: TreeItem<ExtraProps>[];
+  parentId: UniqueIdentifier | null;
 
   /**
    * Determines whether the item's children are initially collapsed.
@@ -45,13 +43,30 @@ export type BaseTreeItem<ExtraProps = unknown> = {
   disableDragging?: boolean;
 };
 
+export type TreeItem<ExtraProps = unknown> = BaseTreeItem & ExtraProps;
 export type TreeItems<ExtraProps = unknown> = TreeItem<ExtraProps>[];
 
-export interface FlattenedItem extends TreeItem {
-  parentId: UniqueIdentifier | null;
+/**
+ * Represents a nested item (legacy or internal) that includes children.
+ */
+export type TreeItemWithChildren<ExtraProps = unknown> = Omit<TreeItem<ExtraProps>, 'parentId'> & {
+  /**
+   * The parent id for this item. Legacy items may omit it.
+   */
+  parentId?: UniqueIdentifier | null;
+
+  /**
+   * An array of child items. If empty, the item is a leaf node.
+   */
+  children: TreeItemWithChildren<ExtraProps>[];
+};
+
+export type TreeItemsWithChildren<ExtraProps = unknown> = TreeItemWithChildren<ExtraProps>[];
+
+export type FlattenedItem<ExtraProps = unknown> = {
   depth: number;
   index: number;
-}
+} & TreeItem<ExtraProps>;
 
 export type SensorContext = MutableRefObject<{
   items: FlattenedItem[];
@@ -68,13 +83,13 @@ export interface SortableTreeProps<T extends TreeItem = TreeItem> {
   indentationWidth?: number;
 
   /**
-   * The array of tree items to be rendered.
+   * The flat array of items to be rendered.
    */
   items: TreeItems<T>;
 
   /**
    * Callback function called when the tree structure changes.
-   * @param items - The updated array of tree items.
+   * @param items - The updated flat array of tree items.
    */
   setItems: React.Dispatch<React.SetStateAction<TreeItems<T>>>;
 
