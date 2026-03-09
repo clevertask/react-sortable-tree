@@ -302,6 +302,27 @@ export interface RenderItemProps<T extends TTreeItem = TTreeItem>
 }
 ```
 
+### DropResult
+
+```ts
+type DropResult<T extends TreeItem = TreeItem> = {
+  movedItem: T;
+  parent: UniqueIdentifier | null;
+  index: number;
+  beforeItemId?: UniqueIdentifier | null;
+  afterItemId?: UniqueIdentifier | null;
+} | null;
+```
+
+### MoveTreeItemResult
+
+```ts
+type MoveTreeItemResult<T extends TreeItem = TreeItem> = {
+  items: TreeItems<T>;
+  result: DropResult<T>;
+};
+```
+
 ---
 
 ## Helper Functions
@@ -329,6 +350,48 @@ function setTreeItemProperties<T extends TreeItem>(
   id: UniqueIdentifier,
   setter: (value: T) => Partial<T>,
 ): TreeItems<T>;
+```
+
+### getTreeItemMoveResult
+
+```ts
+function getTreeItemMoveResult<T extends TreeItem>(
+  items: TreeItems<T>,
+  targetId: UniqueIdentifier,
+): DropResult<T>;
+```
+
+### moveTreeItem
+
+```ts
+function moveTreeItem<T extends TreeItem>(
+  items: TreeItems<T>,
+  itemId: UniqueIdentifier,
+  targetItemId: UniqueIdentifier,
+  position: 'before' | 'after' | 'inside',
+): MoveTreeItemResult<T>;
+```
+
+### moveItemBefore / moveItemAfter / moveItemInside
+
+```ts
+function moveItemBefore<T extends TreeItem>(
+  items: TreeItems<T>,
+  itemId: UniqueIdentifier,
+  targetItemId: UniqueIdentifier,
+): MoveTreeItemResult<T>;
+
+function moveItemAfter<T extends TreeItem>(
+  items: TreeItems<T>,
+  itemId: UniqueIdentifier,
+  targetItemId: UniqueIdentifier,
+): MoveTreeItemResult<T>;
+
+function moveItemInside<T extends TreeItem>(
+  items: TreeItems<T>,
+  itemId: UniqueIdentifier,
+  targetItemId: UniqueIdentifier,
+): MoveTreeItemResult<T>;
 ```
 
 ---

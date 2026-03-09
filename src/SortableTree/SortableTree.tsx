@@ -23,6 +23,7 @@ import { SortableContext, arrayMove, verticalListSortingStrategy } from '@dnd-ki
 
 import {
   buildFlattenedItems,
+  getTreeItemMoveResult,
   getProjection,
   getChildCount,
   getChildrenCountById,
@@ -31,7 +32,6 @@ import {
   setTreeItemProperties,
 } from './utilities';
 import type {
-  DropResult,
   FlattenedItem,
   SensorContext,
   SortableTreeProps,
@@ -223,7 +223,7 @@ function PrivateSortableTree<T extends TreeItem = TreeItem>({
         const sortedItems = arrayMove(clonedItems, activeIndex, overIndex);
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const newItems = sortedItems.map(({ depth, index, ...rest }) => rest) as TreeItems<T>;
-        const result = findItemActualIndex(newItems, clonedItems[activeIndex].id);
+        const result = getTreeItemMoveResult(newItems, clonedItems[activeIndex].id);
 
         setTreeItems(newItems);
         onDragEnd?.(result);
@@ -416,34 +416,6 @@ const adjustTranslate: Modifier = ({ transform }) => {
     y: transform.y - 25,
   };
 };
-
-function findItemActualIndex(items: TreeItems, targetId: UniqueIdentifier): DropResult | null {
-  const targetItem = items.find((item) => item.id === targetId);
-
-  if (!targetItem) {
-    return null;
-  }
-
-  const parentId = targetItem.parentId ?? null;
-  let index = -1;
-  let siblingIndex = 0;
-
-  for (const item of items) {
-    if (item.parentId === parentId) {
-      if (item.id === targetId) {
-        index = siblingIndex;
-        break;
-      }
-      siblingIndex += 1;
-    }
-  }
-
-  if (index === -1) {
-    return null;
-  }
-
-  return { index, parent: parentId, movedItem: targetItem };
-}
 
 export const SortableTree = <T extends TreeItem = TreeItem>(props: SortableTreeProps<T>) => {
   return <PrivateSortableTree {...props} />;
