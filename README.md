@@ -191,6 +191,17 @@ const [items, setItems] = useState<TreeItems<CustomTreeItem>>([
   },
 ]);
 
+// Or you can use a flat structure for your items.
+const BASE_TREE = [
+  { id: 'a', label: 'A', parentId: null },
+  { id: 'z', label: 'Z', parentId: 'a' },
+  { id: 'b', label: 'B', parentId: null },
+  { id: 'b1', label: 'B1', parentId: 'b' },
+  { id: 'c', label: 'C', parentId: null },
+  { id: 'd', label: 'D', parentId: null },
+  { id: 'e', label: 'E', parentId: null },
+];
+
 <SortableTree<CustomTreeItem>
   isCollapsible
   showDropIndicator
