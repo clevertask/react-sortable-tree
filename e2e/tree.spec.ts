@@ -10,45 +10,45 @@ test.afterEach(async ({ page }) => {
   await page.reload();
 });
 
-test('Item A becomes a child of C after drag and drop', async ({ page }) => {
+test('Item D becomes a child of C after drag and drop', async ({ page }) => {
   await page.goto('/');
 
   await dragItem({
     page,
     expect,
-    from: { name: 'A' },
+    from: { name: 'D' },
     to: { name: 'C', position: 'inside' },
   });
 
-  await expectItemToBeChildOf(page, expect, 'A', 'C');
+  await expectItemToBeChildOf(page, expect, 'D', 'C');
 });
 
-test('Item A is moved below C after drag and drop', async ({ page }) => {
+test('Item D is moved below C after drag and drop', async ({ page }) => {
   await page.goto('/');
 
   await dragItem({
     page,
     expect,
-    from: { name: 'A' },
+    from: { name: 'D' },
     to: { name: 'C', position: 'after' },
   });
 
-  await expectItemBefore(page, expect, 'C', 'A');
-  await expectItemNotToBeChildOf(page, expect, 'A', 'C');
+  await expectItemBefore(page, expect, 'C', 'D');
+  await expectItemNotToBeChildOf(page, expect, 'D', 'C');
 });
 
-test('Item C is moved before A after drag and drop', async ({ page }) => {
+test('Item C is moved before D after drag and drop', async ({ page }) => {
   await page.goto('/');
 
   await dragItem({
     page,
     expect,
     from: { name: 'C' },
-    to: { name: 'A', position: 'before' },
+    to: { name: 'D', position: 'before' },
   });
 
-  await expectItemBefore(page, expect, 'C', 'A');
-  await expectItemNotToBeChildOf(page, expect, 'C', 'A');
+  await expectItemBefore(page, expect, 'C', 'D');
+  await expectItemNotToBeChildOf(page, expect, 'C', 'D');
 });
 
 test('Item C is moved before nested item B1 after drag and drop', async ({ page }) => {
@@ -131,17 +131,17 @@ test('Nested item B1 can be moved to top level', async ({ page }) => {
   await expectItemNotToBeChildOf(page, expect, 'B1', 'B');
 });
 
-test('Item A becomes child of B1 when dragged inside', async ({ page }) => {
+test('Item Z becomes child of B1 when dragged inside', async ({ page }) => {
   await page.goto('/');
 
   await dragItem({
     page,
     expect,
-    from: { name: 'A' },
+    from: { name: 'Z' },
     to: { name: 'B1', position: 'inside' },
   });
 
-  await expectItemToBeChildOf(page, expect, 'A', 'B1');
+  await expectItemToBeChildOf(page, expect, 'Z', 'B1');
 });
 
 test('Last item E can be moved before first item A', async ({ page }) => {
@@ -157,7 +157,7 @@ test('Last item E can be moved before first item A', async ({ page }) => {
   await expectItemBefore(page, expect, 'E', 'A');
 });
 
-test('First item A can be moved after last item E', async ({ page }) => {
+test('First item A can be moved after last item E and keep Z as child', async ({ page }) => {
   await page.goto('/');
 
   await dragItem({
@@ -168,4 +168,25 @@ test('First item A can be moved after last item E', async ({ page }) => {
   });
 
   await expectItemBefore(page, expect, 'E', 'A');
+  await expectItemToBeChildOf(page, expect, 'Z', 'A');
+});
+
+test('Programmatic button can move B1 after Z', async ({ page }) => {
+  await page.goto('/');
+
+  await page.getByRole('button', { name: 'Move B1 after Z', exact: true }).click();
+
+  await expectItemBefore(page, expect, 'Z', 'B1');
+  await expectItemToBeChildOf(page, expect, 'B1', 'A');
+  await expectItemNotToBeChildOf(page, expect, 'B1', 'B');
+});
+
+test('Reset tree restores the original parent after a programmatic move', async ({ page }) => {
+  await page.goto('/');
+
+  await page.getByRole('button', { name: 'Move B1 after Z', exact: true }).click();
+  await page.getByRole('button', { name: 'Reset tree', exact: true }).click();
+
+  await expectItemToBeChildOf(page, expect, 'B1', 'B');
+  await expectItemNotToBeChildOf(page, expect, 'B1', 'A');
 });

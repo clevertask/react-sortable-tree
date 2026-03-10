@@ -141,7 +141,7 @@ export interface SortableTreeProps<T extends TreeItem = TreeItem> {
    * Callback function called when a drag operation ends.
    * @param result - An object containing information about the drag operation.
    */
-  onDragEnd?: (result: DropResult) => void;
+  onDragEnd?: (result: DropResult<T>) => void;
 
   /**
    * Callback function called when an item in the tree is clicked.
@@ -161,11 +161,11 @@ export interface SortableTreeProps<T extends TreeItem = TreeItem> {
 /**
  * Represents the result of a drag operation in the tree.
  */
-export type DropResult = {
+export type DropResult<T extends TreeItem = TreeItem> = {
   /**
    * The item that was dragged.
    */
-  movedItem: TreeItem;
+  movedItem: T;
 
   /**
    * The new parent of the dragged item, or null if it's now a root item.
@@ -176,6 +176,21 @@ export type DropResult = {
    * The new index of the dragged item within its parent's children array.
    */
   index: number;
+
+  /**
+   * The id of the previous sibling in the new position, or null when the item is first.
+   */
+  beforeItemId?: UniqueIdentifier | null;
+
+  /**
+   * The id of the next sibling in the new position, or null when the item is last.
+   */
+  afterItemId?: UniqueIdentifier | null;
 } | null;
+
+export type MoveTreeItemResult<T extends TreeItem = TreeItem> = {
+  items: TreeItems<T>;
+  result: DropResult<T>;
+};
 
 export type { UniqueIdentifier } from '@dnd-kit/core';
