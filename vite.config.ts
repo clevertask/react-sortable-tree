@@ -1,14 +1,15 @@
-import dts from 'vite-plugin-dts';
-import { fileURLToPath } from 'url';
 import { defineConfig } from 'vite';
-import { dirname, resolve } from 'path';
-import react from '@vitejs/plugin-react-swc';
+import react from '@vitejs/plugin-react';
+
+import { fileURLToPath } from 'node:url';
+import { dirname, resolve } from 'node:path';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
+// https://vite.dev/config/
 export default defineConfig({
-  plugins: [react(), dts({ tsconfigPath: './tsconfig.app.json' })],
+  plugins: [react()],
   build: {
     lib: {
       entry: resolve(__dirname, 'src/index.ts'),
