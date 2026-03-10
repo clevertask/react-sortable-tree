@@ -43,12 +43,12 @@ function PrivateSortableTreeItem({ id, depth, ...props }: Props) {
       disableSelection={iOS}
       disableInteraction={isSorting}
       handleProps={
-        props.disableDragging ? null : (
-          {
-            ...attributes,
-            ...listeners,
-          }
-        )
+        props.disableDragging
+          ? null
+          : {
+              ...attributes,
+              ...listeners,
+            }
       }
     />
   );

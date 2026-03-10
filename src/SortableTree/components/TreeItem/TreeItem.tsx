@@ -9,7 +9,8 @@ import { TreeItemStructureProps } from '../TreeItemStructure';
 import { TreeItem as TTreeItem } from '../../types';
 
 export interface RenderItemProps<T extends TTreeItem = TTreeItem>
-  extends Pick<
+  extends
+    Pick<
       TreeItemStructureProps,
       'classNames' | 'dropZoneStyle' | 'dropZoneRef' | 'draggableItemRef'
     >,
@@ -32,8 +33,10 @@ export interface RenderItemProps<T extends TTreeItem = TTreeItem>
   };
 }
 
-export interface Props<T extends TTreeItem = TTreeItem>
-  extends Omit<HTMLAttributes<HTMLLIElement>, 'id'> {
+export interface Props<T extends TTreeItem = TTreeItem> extends Omit<
+  HTMLAttributes<HTMLLIElement>,
+  'id'
+> {
   childCount?: number;
   clone?: boolean;
   collapsed?: boolean;
@@ -80,75 +83,77 @@ export const _TreeItem = forwardRef<HTMLDivElement, Props>(
     },
     ref,
   ) => {
-    return renderItem ?
-        renderItem({
-          dropZoneRef: wrapperRef,
-          draggableItemRef: ref,
-          treeItem: value,
-          dataSlots: {
-            dropZone: {
-              'data-slot': 'dropZone',
-              'data-clone': clone,
-              'data-ghost': ghost,
-              'data-indicator': indicator,
-              'data-disable-interaction': disableInteraction,
-              'data-disable-selection': disableSelection,
-            },
-            draggableItem: {
-              'data-slot': 'draggableItem',
-            },
+    return renderItem ? (
+      renderItem({
+        dropZoneRef: wrapperRef,
+        draggableItemRef: ref,
+        treeItem: value,
+        dataSlots: {
+          dropZone: {
+            'data-slot': 'dropZone',
+            'data-clone': clone,
+            'data-ghost': ghost,
+            'data-indicator': indicator,
+            'data-disable-interaction': disableInteraction,
+            'data-disable-selection': disableSelection,
           },
-          dropZoneStyle: {
-            paddingLeft: `${indentationWidth * depth}px`,
-            ...style,
+          draggableItem: {
+            'data-slot': 'draggableItem',
           },
-          dragListeners: handleProps,
-          onCollapse,
-          childCount,
-          clone,
-          ghost,
-          indicator,
-          disableSelection,
-          disableInteraction,
-          collapsed,
-        })
-      : <li
-          className={classNames(
-            styles.Wrapper,
-            clone && styles.clone,
-            ghost && styles.ghost,
-            indicator && styles.indicator,
-            disableSelection && styles.disableSelection,
-            disableInteraction && styles.disableInteraction,
+        },
+        dropZoneStyle: {
+          paddingLeft: `${indentationWidth * depth}px`,
+          ...style,
+        },
+        dragListeners: handleProps,
+        onCollapse,
+        childCount,
+        clone,
+        ghost,
+        indicator,
+        disableSelection,
+        disableInteraction,
+        collapsed,
+      })
+    ) : (
+      <li
+        className={classNames(
+          styles.Wrapper,
+          clone && styles.clone,
+          ghost && styles.ghost,
+          indicator && styles.indicator,
+          disableSelection && styles.disableSelection,
+          disableInteraction && styles.disableInteraction,
+        )}
+        ref={wrapperRef}
+        style={
+          {
+            '--spacing': `${indentationWidth * depth}px`,
+          } as React.CSSProperties
+        }
+        {...props}
+      >
+        <div className={styles.TreeItem} ref={ref} style={style}>
+          {!disableDragging && <Handle {...handleProps} />}
+          {onCollapse && (
+            <Action
+              onClick={onCollapse}
+              className={classNames(styles.Collapse, collapsed && styles.collapsed)}
+            >
+              {collapseIcon}
+            </Action>
           )}
-          ref={wrapperRef}
-          style={
-            {
-              '--spacing': `${indentationWidth * depth}px`,
-            } as React.CSSProperties
-          }
-          {...props}
-        >
-          <div className={styles.TreeItem} ref={ref} style={style}>
-            {!disableDragging && <Handle {...handleProps} />}
-            {onCollapse && (
-              <Action
-                onClick={onCollapse}
-                className={classNames(styles.Collapse, collapsed && styles.collapsed)}
-              >
-                {collapseIcon}
-              </Action>
-            )}
-            <span onClick={onLabelClick} className={styles.Text}>
-              {value.label}
-            </span>
-            {!clone && onRemove && <Remove onClick={onRemove} />}
-            {!clone && onAdd && <Add onClick={onAdd} />}
-            {clone && childCount && childCount > 1 ?
-              <span className={styles.Count}>{childCount}</span>
-            : null}
-          </div>
-        </li>;
+          <span onClick={onLabelClick} className={styles.Text}>
+            {value.label}
+          </span>
+          {!clone && onRemove && <Remove onClick={onRemove} />}
+          {!clone && onAdd && <Add onClick={onAdd} />}
+          {clone && childCount && childCount > 1 ? (
+            <span className={styles.Count}>{childCount}</span>
+          ) : null}
+        </div>
+      </li>
+    );
   },
 );
 

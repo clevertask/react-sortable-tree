@@ -16,6 +16,9 @@ jobs:
       - name: Install dependencies
         run: npm install -g pnpm && pnpm install
 
+      - name: Run formatting check
+        run: pnpm run fmt:check
+
       - name: Install Playwright Browsers
         run: pnpm exec playwright install --with-deps
 

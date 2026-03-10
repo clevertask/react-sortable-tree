@@ -47,14 +47,13 @@ export const TreeItemStructure = ({
   clone,
   dragListeners,
 }: TreeItemStructureProps) => {
-  const dropZoneAria =
-    clone ? null : (
-      {
+  const dropZoneAria = clone
+    ? null
+    : {
         role: 'treeitem',
         'aria-label': treeItem.label,
         ...dataSlots.dropZone,
-      }
-    );
+      };
 
   return (
     <DropZoneComponent

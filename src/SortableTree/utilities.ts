@@ -98,9 +98,9 @@ function buildChildrenByParentId<T extends TreeItem>(items: TreeItems<T>) {
   for (const item of items) {
     const rawParentId = item.parentId ?? null;
     const normalizedParentId =
-      rawParentId != null && itemsById.has(rawParentId) && rawParentId !== item.id ?
-        rawParentId
-      : null;
+      rawParentId != null && itemsById.has(rawParentId) && rawParentId !== item.id
+        ? rawParentId
+        : null;
 
     normalizedParentById.set(item.id, normalizedParentId);
 

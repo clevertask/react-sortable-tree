@@ -31,13 +31,7 @@ import {
   removeChildrenOf,
   setTreeItemProperties,
 } from './utilities';
-import type {
-  FlattenedItem,
-  SensorContext,
-  SortableTreeProps,
-  TreeItem,
-  TreeItems,
-} from './types';
+import type { FlattenedItem, SensorContext, SortableTreeProps, TreeItem, TreeItems } from './types';
 import { sortableTreeKeyboardCoordinates } from './keyboardCoordinates';
 import { SortableTreeItem } from './components';
 import { CSS } from '@dnd-kit/utilities';
@@ -109,12 +103,12 @@ function PrivateSortableTree<T extends TreeItem = TreeItem>({
     const rootItems = flattenedTree.filter(({ parentId }) => parentId == null);
     if (rootItems.length === 1) {
       flattenedTree = flattenedTree.map((item) =>
-        item.id === rootItems[0].id ?
-          {
-            ...item,
-            disableDragging: true,
-          }
-        : item,
+        item.id === rootItems[0].id
+          ? {
+              ...item,
+              disableDragging: true,
+            }
+          : item,
       );
     }
 
@@ -133,9 +127,9 @@ function PrivateSortableTree<T extends TreeItem = TreeItem>({
   }, [activeId, childrenCountById, flatItems]);
 
   const projected =
-    activeId && overId ?
-      getProjection(flattenedItems, activeId, overId, offsetLeft, indentationWidth)
-    : null;
+    activeId && overId
+      ? getProjection(flattenedItems, activeId, overId, offsetLeft, indentationWidth)
+      : null;
 
   const sensorContext: SensorContext = useRef({
     items: flattenedItems,
@@ -370,14 +364,14 @@ function PrivateSortableTree<T extends TreeItem = TreeItem>({
                 indicator={showDropIndicator}
                 collapsed={Boolean(collapsed && canCollapse)}
                 onCollapse={
-                  isCollapsible && canCollapse ?
-                    () => handleCollapse({ id, canFetchChildren, collapsed })
-                  : undefined
+                  isCollapsible && canCollapse
+                    ? () => handleCollapse({ id, canFetchChildren, collapsed })
+                    : undefined
                 }
                 onRemove={
-                  isRemovable ?
-                    () => (onRemoveItem ? onRemoveItem(id) : handleRemove(id))
-                  : undefined
+                  isRemovable
+                    ? () => (onRemoveItem ? onRemoveItem(id) : handleRemove(id))
+                    : undefined
                 }
                 onAdd={allowNestedItemAddition ? () => onAddItem?.(id) : undefined}
                 onLabelClick={onItemClick ? () => onItemClick(id) : undefined}
@@ -390,7 +384,7 @@ function PrivateSortableTree<T extends TreeItem = TreeItem>({
               dropAnimation={dropAnimationConfig}
               modifiers={showDropIndicator ? [adjustTranslate] : undefined}
             >
-              {activeId && activeItem ?
+              {activeId && activeItem ? (
                 <SortableTreeItem
                   id={activeId}
                   depth={activeItem.depth}
@@ -400,7 +394,7 @@ function PrivateSortableTree<T extends TreeItem = TreeItem>({
                   indentationWidth={indentationWidth}
                   renderItem={renderItem}
                 />
-              : null}
+              ) : null}
             </DragOverlay>,
             document.body,
           )}
