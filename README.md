@@ -142,9 +142,7 @@ export const TreeItem = (
 
         {onCollapse && (
           <Button color="gray" variant="ghost" onClick={onCollapse}>
-            {collapsed ?
-              <ChevronRightIcon />
-            : <ChevronDownIcon />}
+            {collapsed ? <ChevronRightIcon /> : <ChevronDownIcon />}
           </Button>
         )}
 

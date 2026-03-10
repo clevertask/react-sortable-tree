@@ -89,9 +89,9 @@ const App = () => {
       </div>
 
       <pre style={{ margin: 0, padding: 12, border: '1px solid #ddd' }}>
-        {lastMoveResult ?
-          JSON.stringify(lastMoveResult, null, 2)
-        : 'Move result will appear here (programmatic or drag-and-drop).'}
+        {lastMoveResult
+          ? JSON.stringify(lastMoveResult, null, 2)
+          : 'Move result will appear here (programmatic or drag-and-drop).'}
       </pre>
 
       <SortableTree<CustomTreeItem>
