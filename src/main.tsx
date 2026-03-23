@@ -9,6 +9,8 @@ import {
   moveItemsAfter,
   moveItemsBefore,
   moveItemsInside,
+  removeItemById,
+  removeItemsById,
   SortableTree,
   TreeItem,
   TreeItems,
@@ -52,6 +54,14 @@ const App = () => {
       }
 
       return moveResult.items;
+    });
+  };
+
+  const runProgrammaticRemove = (removeFn: (items: MyTreeItem) => MyTreeItem) => {
+    setTreeItems((currentItems) => {
+      const nextItems = removeFn(currentItems);
+      setLastMoveResult(null);
+      return nextItems;
     });
   };
 
@@ -114,6 +124,14 @@ const App = () => {
           }
         >
           Extract A + Z inside C
+        </button>
+        <button onClick={() => runProgrammaticRemove((items) => removeItemById(items, 'b'))}>
+          Remove B
+        </button>
+        <button
+          onClick={() => runProgrammaticRemove((items) => removeItemsById(items, ['a', 'z']))}
+        >
+          Remove A + Z
         </button>
         <button
           onClick={() => {

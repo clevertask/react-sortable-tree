@@ -240,3 +240,23 @@ test('Programmatic button can extract a selected descendant and move it with its
   await expectItemNotToBeChildOf(page, expect, 'Z', 'A');
   await expectItemBefore(page, expect, 'A', 'Z');
 });
+
+test('Programmatic button can remove B and its subtree', async ({ page }) => {
+  await page.goto('/');
+
+  await page.getByRole('button', { name: 'Remove B', exact: true }).click();
+
+  await expect(page.getByRole('treeitem', { name: 'B', exact: true })).toHaveCount(0);
+  await expect(page.getByRole('treeitem', { name: 'B1', exact: true })).toHaveCount(0);
+  await expect(page.getByRole('treeitem', { name: 'A', exact: true })).toHaveCount(1);
+});
+
+test('Programmatic bulk removal ignores overlapping parent and child ids', async ({ page }) => {
+  await page.goto('/');
+
+  await page.getByRole('button', { name: 'Remove A + Z', exact: true }).click();
+
+  await expect(page.getByRole('treeitem', { name: 'A', exact: true })).toHaveCount(0);
+  await expect(page.getByRole('treeitem', { name: 'Z', exact: true })).toHaveCount(0);
+  await expect(page.getByRole('treeitem', { name: 'B', exact: true })).toHaveCount(1);
+});
