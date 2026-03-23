@@ -387,6 +387,18 @@ function removeItemById<T extends TreeItem>(
 ): TreeItems<T>;
 ```
 
+### removeItemsById
+
+```ts
+function removeItemsById<T extends TreeItem>(
+  items: TreeItems<T>,
+  itemIds: UniqueIdentifier[],
+): TreeItems<T>;
+```
+
+When multiple ids overlap, removal is subtree-aware. For example, removing both `A` and `A.1`
+has the same effect as removing `A`: the parent and all of its descendants are removed once.
+
 ### setTreeItemProperties
 
 ```ts

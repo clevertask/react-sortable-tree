@@ -275,12 +275,35 @@ export function convertTreeToFlatItems<T extends TreeItem>(
   return flattenTree(items).map(({ depth, index, ...rest }) => rest) as TreeItems<T>;
 }
 
+function getIdsWithDescendants<T extends TreeItem>(
+  items: TreeItems<T>,
+  itemIds: UniqueIdentifier[],
+): Set<UniqueIdentifier> {
+  const idsToRemove = getDescendantIds(items, itemIds);
+
+  for (const itemId of itemIds) {
+    idsToRemove.add(itemId);
+  }
+
+  return idsToRemove;
+}
+
 export function removeItemById<T extends TreeItem>(
   items: TreeItems<T>,
   id: UniqueIdentifier,
 ): TreeItems<T> {
-  const idsToRemove = getDescendantIds(items, [id]);
-  idsToRemove.add(id);
+  return removeItemsById(items, [id]);
+}
+
+export function removeItemsById<T extends TreeItem>(
+  items: TreeItems<T>,
+  itemIds: UniqueIdentifier[],
+): TreeItems<T> {
+  if (itemIds.length === 0) {
+    return items;
+  }
+
+  const idsToRemove = getIdsWithDescendants(items, itemIds);
 
   return items.filter((item) => !idsToRemove.has(item.id));
 }

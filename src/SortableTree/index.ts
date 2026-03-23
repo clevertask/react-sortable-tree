@@ -5,6 +5,7 @@ export type { TreeItemStructureProps, RenderItemProps } from './components';
 export {
   setTreeItemProperties,
   removeItemById,
+  removeItemsById,
   getItemById,
   getTreeItemMoveResult,
   convertTreeToFlatItems,
