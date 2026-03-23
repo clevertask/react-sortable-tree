@@ -190,3 +190,53 @@ test('Reset tree restores the original parent after a programmatic move', async 
   await expectItemToBeChildOf(page, expect, 'B1', 'B');
   await expectItemNotToBeChildOf(page, expect, 'B1', 'A');
 });
+
+test('Programmatic button can move A and B before E as a bulk block', async ({ page }) => {
+  await page.goto('/');
+
+  await page.getByRole('button', { name: 'Move A + B before E', exact: true }).click();
+
+  await expectItemBefore(page, expect, 'D', 'A');
+  await expectItemBefore(page, expect, 'A', 'B');
+  await expectItemBefore(page, expect, 'B', 'E');
+  await expectItemToBeChildOf(page, expect, 'Z', 'A');
+  await expectItemToBeChildOf(page, expect, 'B1', 'B');
+});
+
+test('Programmatic button can move A and B after C as a bulk block', async ({ page }) => {
+  await page.goto('/');
+
+  await page.getByRole('button', { name: 'Move A + B after C', exact: true }).click();
+
+  await expectItemBefore(page, expect, 'C', 'A');
+  await expectItemBefore(page, expect, 'A', 'B');
+  await expectItemBefore(page, expect, 'B', 'D');
+  await expectItemToBeChildOf(page, expect, 'Z', 'A');
+  await expectItemToBeChildOf(page, expect, 'B1', 'B');
+});
+
+test('Programmatic button can move A and B inside C while preserving their subtrees', async ({
+  page,
+}) => {
+  await page.goto('/');
+
+  await page.getByRole('button', { name: 'Move A + B inside C', exact: true }).click();
+
+  await expectItemToBeChildOf(page, expect, 'A', 'C');
+  await expectItemToBeChildOf(page, expect, 'B', 'C');
+  await expectItemToBeChildOf(page, expect, 'Z', 'A');
+  await expectItemToBeChildOf(page, expect, 'B1', 'B');
+});
+
+test('Programmatic button can extract a selected descendant and move it with its parent', async ({
+  page,
+}) => {
+  await page.goto('/');
+
+  await page.getByRole('button', { name: 'Extract A + Z inside C', exact: true }).click();
+
+  await expectItemToBeChildOf(page, expect, 'A', 'C');
+  await expectItemToBeChildOf(page, expect, 'Z', 'C');
+  await expectItemNotToBeChildOf(page, expect, 'Z', 'A');
+  await expectItemBefore(page, expect, 'A', 'Z');
+});

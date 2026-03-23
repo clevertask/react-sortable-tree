@@ -6,19 +6,26 @@ import {
   moveItemAfter,
   moveItemBefore,
   moveItemInside,
+  moveItemsAfter,
+  moveItemsBefore,
+  moveItemsInside,
   SortableTree,
   TreeItem,
   TreeItems,
   TreeItemStructure,
 } from './index';
 import { RenderItemProps } from './SortableTree/components/TreeItem/TreeItem';
-import type { DropResult, MoveTreeItemResult } from './index';
+import type { DropResult, MoveTreeItemResult, MoveTreeItemsResult } from './index';
 
 type CustomTreeItem = TreeItem<{
   icon?: string;
   description?: string;
 }>;
 type MyTreeItem = TreeItems<CustomTreeItem>;
+type LastMoveResult = DropResult<CustomTreeItem> | DropResult<CustomTreeItem>[];
+type ProgrammaticMoveResult =
+  | MoveTreeItemResult<CustomTreeItem>
+  | MoveTreeItemsResult<CustomTreeItem>;
 
 const BASE_TREE: MyTreeItem = [
   { id: 'a', label: 'A', parentId: null },
@@ -32,15 +39,19 @@ const BASE_TREE: MyTreeItem = [
 
 const App = () => {
   const [treeItems, setTreeItems] = useState<MyTreeItem>(BASE_TREE);
-  const [lastMoveResult, setLastMoveResult] = useState<DropResult<CustomTreeItem>>(null);
+  const [lastMoveResult, setLastMoveResult] = useState<LastMoveResult>(null);
 
-  const runProgrammaticMove = (
-    moveFn: (items: MyTreeItem) => MoveTreeItemResult<CustomTreeItem>,
-  ) => {
+  const runProgrammaticMove = (moveFn: (items: MyTreeItem) => ProgrammaticMoveResult) => {
     setTreeItems((currentItems) => {
-      const { items, result } = moveFn(currentItems);
-      setLastMoveResult(result);
-      return items;
+      const moveResult = moveFn(currentItems);
+
+      if ('results' in moveResult) {
+        setLastMoveResult(moveResult.results);
+      } else {
+        setLastMoveResult(moveResult.result);
+      }
+
+      return moveResult.items;
     });
   };
 
@@ -77,6 +88,32 @@ const App = () => {
         </button>
         <button onClick={() => runProgrammaticMove((items) => moveItemInside(items, 'e', 'a'))}>
           Move E inside A
+        </button>
+        <button
+          onClick={() => runProgrammaticMove((items) => moveItemsBefore(items, ['a', 'b'], 'e'))}
+        >
+          Move A + B before E
+        </button>
+        <button
+          onClick={() => runProgrammaticMove((items) => moveItemsAfter(items, ['a', 'b'], 'c'))}
+        >
+          Move A + B after C
+        </button>
+        <button
+          onClick={() => runProgrammaticMove((items) => moveItemsInside(items, ['a', 'b'], 'c'))}
+        >
+          Move A + B inside C
+        </button>
+        <button
+          onClick={() =>
+            runProgrammaticMove((items) =>
+              moveItemsInside(items, ['a', 'z'], 'c', {
+                overlapBehavior: 'extract-selected-descendants',
+              }),
+            )
+          }
+        >
+          Extract A + Z inside C
         </button>
         <button
           onClick={() => {

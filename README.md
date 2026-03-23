@@ -332,6 +332,42 @@ type MoveTreeItemResult<T extends TreeItem = TreeItem> = {
 };
 ```
 
+### MoveTreeItemsOptions
+
+```ts
+type MoveTreeItemsOptions = {
+  overlapBehavior?: 'preserve-subtrees' | 'extract-selected-descendants';
+};
+```
+
+This option exists because overlapping selections can be interpreted in two valid ways.
+If a user selects both a parent item and one of its descendants, the library needs to know
+whether the descendant should stay inside the moved parent subtree, or be extracted and moved
+as its own item too.
+
+Example:
+
+```txt
+A
+  A.1
+C
+```
+
+If `A` and `A.1` are both selected and moved `inside` `C`:
+
+- `preserve-subtrees` (default): `A` is treated as the effective move root, so `A.1` stays inside `A`.
+- `extract-selected-descendants`: both explicit selections are honored, so `A` and `A.1` become siblings under `C`.
+
+### MoveTreeItemsResult
+
+```ts
+type MoveTreeItemsResult<T extends TreeItem = TreeItem> = {
+  items: TreeItems<T>;
+  results: DropResult<T>[];
+  movedItemIds: UniqueIdentifier[];
+};
+```
+
 ---
 
 ## Helper Functions
@@ -381,6 +417,18 @@ function moveTreeItem<T extends TreeItem>(
 ): MoveTreeItemResult<T>;
 ```
 
+### moveTreeItems
+
+```ts
+function moveTreeItems<T extends TreeItem>(
+  items: TreeItems<T>,
+  itemIds: UniqueIdentifier[],
+  targetItemId: UniqueIdentifier,
+  position: 'before' | 'after' | 'inside',
+  options?: MoveTreeItemsOptions,
+): MoveTreeItemsResult<T>;
+```
+
 ### moveItemBefore / moveItemAfter / moveItemInside
 
 ```ts
@@ -401,6 +449,31 @@ function moveItemInside<T extends TreeItem>(
   itemId: UniqueIdentifier,
   targetItemId: UniqueIdentifier,
 ): MoveTreeItemResult<T>;
+```
+
+### moveItemsBefore / moveItemsAfter / moveItemsInside
+
+```ts
+function moveItemsBefore<T extends TreeItem>(
+  items: TreeItems<T>,
+  itemIds: UniqueIdentifier[],
+  targetItemId: UniqueIdentifier,
+  options?: MoveTreeItemsOptions,
+): MoveTreeItemsResult<T>;
+
+function moveItemsAfter<T extends TreeItem>(
+  items: TreeItems<T>,
+  itemIds: UniqueIdentifier[],
+  targetItemId: UniqueIdentifier,
+  options?: MoveTreeItemsOptions,
+): MoveTreeItemsResult<T>;
+
+function moveItemsInside<T extends TreeItem>(
+  items: TreeItems<T>,
+  itemIds: UniqueIdentifier[],
+  targetItemId: UniqueIdentifier,
+  options?: MoveTreeItemsOptions,
+): MoveTreeItemsResult<T>;
 ```
 
 ---
