@@ -193,4 +193,22 @@ export type MoveTreeItemResult<T extends TreeItem = TreeItem> = {
   result: DropResult<T>;
 };
 
+export type MoveTreeItemsOverlapBehavior = 'preserve-subtrees' | 'extract-selected-descendants';
+
+export type MoveTreeItemsOptions = {
+  /**
+   * Controls how overlapping selections are handled.
+   * - preserve-subtrees: descendants of selected parents are ignored as separate move roots
+   * - extract-selected-descendants: explicitly selected descendants are detached and moved too
+   * @default 'preserve-subtrees'
+   */
+  overlapBehavior?: MoveTreeItemsOverlapBehavior;
+};
+
+export type MoveTreeItemsResult<T extends TreeItem = TreeItem> = {
+  items: TreeItems<T>;
+  results: DropResult<T>[];
+  movedItemIds: UniqueIdentifier[];
+};
+
 export type { UniqueIdentifier } from '@dnd-kit/core';

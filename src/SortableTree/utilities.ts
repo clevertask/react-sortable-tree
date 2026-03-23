@@ -5,6 +5,8 @@ import type {
   DropResult,
   FlattenedItem,
   MoveTreeItemResult,
+  MoveTreeItemsOptions,
+  MoveTreeItemsResult,
   TreeItem,
   TreeItems,
   TreeItemsWithChildren,
@@ -113,6 +115,67 @@ function buildChildrenByParentId<T extends TreeItem>(items: TreeItems<T>) {
   }
 
   return { childrenByParentId, normalizedParentById };
+}
+
+function getOrderedUniqueItemIds<T extends TreeItem>(
+  items: TreeItems<T>,
+  itemIds: UniqueIdentifier[],
+): UniqueIdentifier[] {
+  const remainingIds = new Set(itemIds);
+
+  if (remainingIds.size === 0) {
+    return [];
+  }
+
+  const orderedIds: UniqueIdentifier[] = [];
+
+  for (const item of buildFlattenedItems(items)) {
+    if (!remainingIds.has(item.id)) {
+      continue;
+    }
+
+    orderedIds.push(item.id);
+    remainingIds.delete(item.id);
+  }
+
+  return orderedIds;
+}
+
+function hasSelectedAncestor(
+  id: UniqueIdentifier,
+  selectedIds: Set<UniqueIdentifier>,
+  normalizedParentById: Map<UniqueIdentifier, ParentId>,
+): boolean {
+  let parentId = normalizedParentById.get(id) ?? null;
+
+  while (parentId != null) {
+    if (selectedIds.has(parentId)) {
+      return true;
+    }
+
+    parentId = normalizedParentById.get(parentId) ?? null;
+  }
+
+  return false;
+}
+
+function getEffectiveMovedItemIds<T extends TreeItem>(
+  items: TreeItems<T>,
+  itemIds: UniqueIdentifier[],
+  overlapBehavior: MoveTreeItemsOptions['overlapBehavior'] = 'preserve-subtrees',
+): UniqueIdentifier[] {
+  const orderedItemIds = getOrderedUniqueItemIds(items, itemIds);
+
+  if (overlapBehavior === 'extract-selected-descendants') {
+    return orderedItemIds;
+  }
+
+  const { normalizedParentById } = buildChildrenByParentId(items);
+  const selectedIds = new Set(orderedItemIds);
+
+  return orderedItemIds.filter(
+    (itemId) => !hasSelectedAncestor(itemId, selectedIds, normalizedParentById),
+  );
 }
 
 function getDescendantIds<T extends TreeItem>(
@@ -375,33 +438,40 @@ function flattenFromChildrenMap<T extends TreeItem>(
   return result;
 }
 
-export function moveTreeItem<T extends TreeItem>(
+export function moveTreeItems<T extends TreeItem>(
   items: TreeItems<T>,
-  itemId: UniqueIdentifier,
+  itemIds: UniqueIdentifier[],
   targetItemId: UniqueIdentifier,
   position: MoveTreeItemPosition,
-): MoveTreeItemResult<T> {
-  if (itemId === targetItemId) {
-    return { items, result: null };
+  options: MoveTreeItemsOptions = {},
+): MoveTreeItemsResult<T> {
+  const movedItemIds = getEffectiveMovedItemIds(items, itemIds, options.overlapBehavior);
+
+  if (movedItemIds.length === 0) {
+    return { items, results: [], movedItemIds: [] };
+  }
+
+  if (movedItemIds.includes(targetItemId)) {
+    return { items, results: [], movedItemIds: [] };
   }
 
   const { childrenByParentId, normalizedParentById } = buildChildrenByParentId(items);
-
   const itemById = new Map<UniqueIdentifier, T>();
+
   for (const item of items) {
     itemById.set(item.id, item);
   }
 
-  const item = itemById.get(itemId);
-  const target = itemById.get(targetItemId);
-
-  if (!item || !target) {
-    return { items, result: null };
+  if (!itemById.has(targetItemId)) {
+    return { items, results: [], movedItemIds: [] };
   }
 
-  const descendantsOfItem = getTreeDescendantIds(childrenByParentId, itemId);
-  if (descendantsOfItem.has(targetItemId)) {
-    return { items, result: null };
+  for (const itemId of movedItemIds) {
+    const descendantsOfItem = getTreeDescendantIds(childrenByParentId, itemId);
+
+    if (descendantsOfItem.has(targetItemId)) {
+      return { items, results: [], movedItemIds: [] };
+    }
   }
 
   const siblingsByParentId = new Map<ParentId, UniqueIdentifier[]>();
@@ -413,12 +483,14 @@ export function moveTreeItem<T extends TreeItem>(
     );
   }
 
-  const itemParentId = normalizedParentById.get(itemId) ?? null;
-  const itemSiblings = siblingsByParentId.get(itemParentId) ?? [];
-  const itemIndex = itemSiblings.indexOf(itemId);
+  for (const itemId of movedItemIds) {
+    const itemParentId = normalizedParentById.get(itemId) ?? null;
+    const itemSiblings = siblingsByParentId.get(itemParentId) ?? [];
+    const itemIndex = itemSiblings.indexOf(itemId);
 
-  if (itemIndex >= 0) {
-    itemSiblings.splice(itemIndex, 1);
+    if (itemIndex >= 0) {
+      itemSiblings.splice(itemIndex, 1);
+    }
   }
 
   let destinationParentId: ParentId;
@@ -434,7 +506,7 @@ export function moveTreeItem<T extends TreeItem>(
     const targetIndex = destinationSiblings.indexOf(targetItemId);
 
     if (targetIndex < 0) {
-      return { items, result: null };
+      return { items, results: [], movedItemIds: [] };
     }
 
     destinationIndex = position === 'before' ? targetIndex : targetIndex + 1;
@@ -450,16 +522,52 @@ export function moveTreeItem<T extends TreeItem>(
     Math.max(destinationIndex, 0),
     destinationSiblings.length,
   );
-  destinationSiblings.splice(boundedDestinationIndex, 0, itemId);
+  destinationSiblings.splice(boundedDestinationIndex, 0, ...movedItemIds);
 
   const nextItemById = new Map(itemById);
-  nextItemById.set(itemId, { ...item, parentId: destinationParentId });
+
+  for (const itemId of movedItemIds) {
+    const item = itemById.get(itemId);
+
+    if (!item) {
+      continue;
+    }
+
+    nextItemById.set(itemId, {
+      ...item,
+      parentId: destinationParentId,
+    });
+  }
 
   const nextItems = flattenFromChildrenMap(nextItemById, siblingsByParentId);
+  const results = movedItemIds.reduce<DropResult<T>[]>((acc, itemId) => {
+    const result = getTreeItemMoveResult(nextItems, itemId);
+
+    if (result) {
+      acc.push(result);
+    }
+
+    return acc;
+  }, []);
 
   return {
     items: nextItems,
-    result: getTreeItemMoveResult(nextItems, itemId),
+    results,
+    movedItemIds,
+  };
+}
+
+export function moveTreeItem<T extends TreeItem>(
+  items: TreeItems<T>,
+  itemId: UniqueIdentifier,
+  targetItemId: UniqueIdentifier,
+  position: MoveTreeItemPosition,
+): MoveTreeItemResult<T> {
+  const { items: nextItems, results } = moveTreeItems(items, [itemId], targetItemId, position);
+
+  return {
+    items: nextItems,
+    result: results[0] ?? null,
   };
 }
 
@@ -485,4 +593,31 @@ export function moveItemInside<T extends TreeItem>(
   targetItemId: UniqueIdentifier,
 ): MoveTreeItemResult<T> {
   return moveTreeItem(items, itemId, targetItemId, 'inside');
+}
+
+export function moveItemsBefore<T extends TreeItem>(
+  items: TreeItems<T>,
+  itemIds: UniqueIdentifier[],
+  targetItemId: UniqueIdentifier,
+  options?: MoveTreeItemsOptions,
+): MoveTreeItemsResult<T> {
+  return moveTreeItems(items, itemIds, targetItemId, 'before', options);
+}
+
+export function moveItemsAfter<T extends TreeItem>(
+  items: TreeItems<T>,
+  itemIds: UniqueIdentifier[],
+  targetItemId: UniqueIdentifier,
+  options?: MoveTreeItemsOptions,
+): MoveTreeItemsResult<T> {
+  return moveTreeItems(items, itemIds, targetItemId, 'after', options);
+}
+
+export function moveItemsInside<T extends TreeItem>(
+  items: TreeItems<T>,
+  itemIds: UniqueIdentifier[],
+  targetItemId: UniqueIdentifier,
+  options?: MoveTreeItemsOptions,
+): MoveTreeItemsResult<T> {
+  return moveTreeItems(items, itemIds, targetItemId, 'inside', options);
 }

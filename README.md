@@ -332,6 +332,24 @@ type MoveTreeItemResult<T extends TreeItem = TreeItem> = {
 };
 ```
 
+### MoveTreeItemsOptions
+
+```ts
+type MoveTreeItemsOptions = {
+  overlapBehavior?: 'preserve-subtrees' | 'extract-selected-descendants';
+};
+```
+
+### MoveTreeItemsResult
+
+```ts
+type MoveTreeItemsResult<T extends TreeItem = TreeItem> = {
+  items: TreeItems<T>;
+  results: DropResult<T>[];
+  movedItemIds: UniqueIdentifier[];
+};
+```
+
 ---
 
 ## Helper Functions
@@ -381,6 +399,18 @@ function moveTreeItem<T extends TreeItem>(
 ): MoveTreeItemResult<T>;
 ```
 
+### moveTreeItems
+
+```ts
+function moveTreeItems<T extends TreeItem>(
+  items: TreeItems<T>,
+  itemIds: UniqueIdentifier[],
+  targetItemId: UniqueIdentifier,
+  position: 'before' | 'after' | 'inside',
+  options?: MoveTreeItemsOptions,
+): MoveTreeItemsResult<T>;
+```
+
 ### moveItemBefore / moveItemAfter / moveItemInside
 
 ```ts
@@ -401,6 +431,31 @@ function moveItemInside<T extends TreeItem>(
   itemId: UniqueIdentifier,
   targetItemId: UniqueIdentifier,
 ): MoveTreeItemResult<T>;
+```
+
+### moveItemsBefore / moveItemsAfter / moveItemsInside
+
+```ts
+function moveItemsBefore<T extends TreeItem>(
+  items: TreeItems<T>,
+  itemIds: UniqueIdentifier[],
+  targetItemId: UniqueIdentifier,
+  options?: MoveTreeItemsOptions,
+): MoveTreeItemsResult<T>;
+
+function moveItemsAfter<T extends TreeItem>(
+  items: TreeItems<T>,
+  itemIds: UniqueIdentifier[],
+  targetItemId: UniqueIdentifier,
+  options?: MoveTreeItemsOptions,
+): MoveTreeItemsResult<T>;
+
+function moveItemsInside<T extends TreeItem>(
+  items: TreeItems<T>,
+  itemIds: UniqueIdentifier[],
+  targetItemId: UniqueIdentifier,
+  options?: MoveTreeItemsOptions,
+): MoveTreeItemsResult<T>;
 ```
 
 ---
