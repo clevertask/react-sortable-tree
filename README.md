@@ -203,6 +203,7 @@ const BASE_TREE = [
 <SortableTree<CustomTreeItem>
   isCollapsible
   showDropIndicator
+  autoExpandOnHoverDelay={600}
   items={items}
   setItems={setItems}
   renderItem={(props: RenderItemProps<CustomTreeItem>) => (
@@ -215,6 +216,8 @@ const BASE_TREE = [
   )}
 />;
 ```
+
+Use `autoExpandOnHoverDelay` when you want collapsed parents to expand while a user is dragging over a nesting position. This lets people continue navigating deeper into the tree without dropping the item first. The prop is optional, so consumers can decide whether to enable the behavior and how long the hover delay should be.
 
 ---
 
@@ -229,6 +232,7 @@ const BASE_TREE = [
 | `isCollapsible`           | `boolean`                                                       | `false`     | Determines if tree items can be collapsed/expanded.                                                                  |
 | `onLazyLoadChildren`      | `(id: UniqueIdentifier, isExpanding: boolean) => Promise<void>` | `undefined` | Callback for lazy loading child items when a parent is expanded. Useful for getting child items from an API endpoint |
 | `showDropIndicator`       | `boolean`                                                       | `false`     | Determines if a drop indicator should be shown when dragging items.                                                  |
+| `autoExpandOnHoverDelay`  | `number`                                                        | `undefined` | Automatically expands a collapsed parent after the given hover delay in milliseconds while dragging into it.         |
 | `isRemovable`             | `boolean`                                                       | `false`     | Determines if items can be removed from the tree.                                                                    |
 | `onRemoveItem`            | `(id: UniqueIdentifier) => void`                                | `undefined` | Callback function called when an item is removed from the tree.                                                      |
 | `allowNestedItemAddition` | `boolean`                                                       | `false`     | Determines if new items can be added as children to existing items.                                                  |
