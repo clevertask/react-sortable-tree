@@ -71,6 +71,7 @@ function PrivateSortableTree<T extends TreeItem = TreeItem>({
   isCollapsible,
   onLazyLoadChildren,
   showDropIndicator = false,
+  autoExpandOnHoverDelay,
   indentationWidth = 50,
   isRemovable,
   onRemoveItem,
@@ -87,6 +88,7 @@ function PrivateSortableTree<T extends TreeItem = TreeItem>({
     parentId: UniqueIdentifier | null;
     overId: UniqueIdentifier;
   } | null>(null);
+  const autoExpandTimeoutRef = useRef<number | null>(null);
 
   const flatItems = useMemo(() => {
     return buildFlattenedItems(items);
@@ -165,6 +167,13 @@ function PrivateSortableTree<T extends TreeItem = TreeItem>({
     };
   }, [flattenedItems, offsetLeft]);
 
+  const clearAutoExpandTimeout = useCallback(() => {
+    if (autoExpandTimeoutRef.current !== null) {
+      window.clearTimeout(autoExpandTimeoutRef.current);
+      autoExpandTimeoutRef.current = null;
+    }
+  }, []);
+
   const handleDragStart = useCallback(
     ({ active: { id: activeId } }: DragStartEvent) => {
       setActiveId(activeId);
@@ -193,13 +202,14 @@ function PrivateSortableTree<T extends TreeItem = TreeItem>({
   }, []);
 
   const resetState = useCallback(() => {
+    clearAutoExpandTimeout();
     setOverId(null);
     setActiveId(null);
     setOffsetLeft(0);
     setCurrentPosition(null);
 
     document.body.style.setProperty('cursor', '');
-  }, []);
+  }, [clearAutoExpandTimeout]);
 
   const handleDragEnd = useCallback(
     ({ active, over }: DragEndEvent) => {
@@ -237,6 +247,40 @@ function PrivateSortableTree<T extends TreeItem = TreeItem>({
     [setTreeItems],
   );
 
+  const setCollapsedState = useCallback(
+    (id: UniqueIdentifier, collapsed: boolean) => {
+      return setTreeItems((items) =>
+        setTreeItemProperties(items, id, () => {
+          return { collapsed } as Partial<T>;
+        }),
+      );
+    },
+    [setTreeItems],
+  );
+
+  const expandItem = useCallback(
+    ({
+      id,
+      canFetchChildren,
+      collapsed,
+    }: {
+      id: UniqueIdentifier;
+      canFetchChildren: TreeItem['canFetchChildren'];
+      collapsed: TreeItem['collapsed'];
+    }) => {
+      if (!collapsed) {
+        return;
+      }
+
+      if (canFetchChildren) {
+        return onLazyLoadChildren?.(id, true);
+      }
+
+      return setCollapsedState(id, false);
+    },
+    [onLazyLoadChildren, setCollapsedState],
+  );
+
   const handleCollapse = useCallback(
     ({
       id,
@@ -247,18 +291,64 @@ function PrivateSortableTree<T extends TreeItem = TreeItem>({
       canFetchChildren: TreeItem['canFetchChildren'];
       collapsed: TreeItem['collapsed'];
     }) => {
-      if (canFetchChildren) {
-        return onLazyLoadChildren?.(id, Boolean(collapsed));
+      if (collapsed) {
+        return expandItem({ id, canFetchChildren, collapsed });
       }
 
-      return setTreeItems((items) =>
-        setTreeItemProperties(items, id, (item) => {
-          return { collapsed: !item.collapsed } as T;
-        }),
-      );
+      if (canFetchChildren) {
+        return onLazyLoadChildren?.(id, false);
+      }
+
+      return setCollapsedState(id, true);
     },
-    [onLazyLoadChildren, setTreeItems],
+    [expandItem, onLazyLoadChildren, setCollapsedState],
   );
+
+  useEffect(() => {
+    clearAutoExpandTimeout();
+
+    const autoExpandTargetId = projected?.parentId;
+
+    if (autoExpandOnHoverDelay == null || !activeId || !autoExpandTargetId) {
+      return;
+    }
+
+    const targetItem = flatItems.find((item) => item.id === autoExpandTargetId);
+
+    if (!targetItem?.collapsed) {
+      return;
+    }
+
+    const hasChildren = (childrenCountById.get(autoExpandTargetId) ?? 0) > 0;
+    const canExpand = hasChildren || Boolean(targetItem.canFetchChildren);
+
+    if (!canExpand) {
+      return;
+    }
+
+    autoExpandTimeoutRef.current = window.setTimeout(() => {
+      expandItem({
+        id: targetItem.id,
+        canFetchChildren: targetItem.canFetchChildren,
+        collapsed: targetItem.collapsed,
+      });
+      autoExpandTimeoutRef.current = null;
+    }, autoExpandOnHoverDelay);
+
+    return clearAutoExpandTimeout;
+  }, [
+    activeId,
+    autoExpandOnHoverDelay,
+    childrenCountById,
+    clearAutoExpandTimeout,
+    expandItem,
+    flatItems,
+    projected,
+  ]);
+
+  useEffect(() => {
+    return clearAutoExpandTimeout;
+  }, [clearAutoExpandTimeout]);
 
   const getMovementAnnouncement = useCallback(
     (eventName: string, activeId: UniqueIdentifier, overId?: UniqueIdentifier) => {

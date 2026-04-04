@@ -114,6 +114,12 @@ export interface SortableTreeProps<T extends TreeItem = TreeItem> {
   showDropIndicator?: boolean;
 
   /**
+   * When provided, automatically expands a collapsed item after it has been hovered
+   * for the given amount of time during a drag operation.
+   */
+  autoExpandOnHoverDelay?: number;
+
+  /**
    * Determines if items can be removed from the tree.
    * @default false
    */

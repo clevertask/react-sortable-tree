@@ -11,6 +11,7 @@ import {
   moveItemsInside,
   removeItemById,
   removeItemsById,
+  setTreeItemProperties,
   SortableTree,
   TreeItem,
   TreeItems,
@@ -134,6 +135,15 @@ const App = () => {
           Remove A + Z
         </button>
         <button
+          onClick={() =>
+            setTreeItems((items) =>
+              setTreeItemProperties(items, 'a', (item) => ({ collapsed: !item.collapsed })),
+            )
+          }
+        >
+          Toggle A collapse
+        </button>
+        <button
           onClick={() => {
             setTreeItems(BASE_TREE);
             setLastMoveResult(null);
@@ -152,6 +162,7 @@ const App = () => {
       <SortableTree<CustomTreeItem>
         isCollapsible
         showDropIndicator
+        autoExpandOnHoverDelay={600}
         items={treeItems}
         setItems={setTreeItems}
         renderItem={MyCustomTreeItem}

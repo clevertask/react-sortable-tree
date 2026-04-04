@@ -4,6 +4,7 @@ import {
   expectItemBefore,
   expectItemNotToBeChildOf,
   expectItemToBeChildOf,
+  getTreeItem,
 } from './utils';
 
 test.afterEach(async ({ page }) => {
@@ -21,6 +22,31 @@ test('Item D becomes a child of C after drag and drop', async ({ page }) => {
   });
 
   await expectItemToBeChildOf(page, expect, 'D', 'C');
+});
+
+test('Collapsed parents auto-expand when dragging indicates nesting into them', async ({
+  page,
+}) => {
+  await page.goto('/');
+
+  await page.getByRole('button', { name: 'Toggle A collapse', exact: true }).click();
+  await expect(getTreeItem(page, 'Z')).toHaveCount(0);
+
+  await dragItem({
+    page,
+    expect,
+    from: { name: 'C' },
+    to: { name: 'B', position: 'before', horizontalOffset: 80 },
+    beforeDrop: {
+      waitMs: 1500,
+      run: async ({ page, expect }) => {
+        await expect(getTreeItem(page, 'Z')).toHaveCount(1);
+      },
+      continueTo: { name: 'Z', position: 'before' },
+    },
+  });
+
+  await expectItemToBeChildOf(page, expect, 'C', 'A');
 });
 
 test('Item D is moved below C after drag and drop', async ({ page }) => {
