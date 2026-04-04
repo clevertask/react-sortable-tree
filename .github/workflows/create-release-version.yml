@@ -4,11 +4,11 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: "Version to release (for example 0.1.0 or 1.0.0-alpha.0)"
+        description: 'Version to release (for example 0.1.0 or 1.0.0-alpha.0)'
         required: true
         type: string
       prerelease:
-        description: "Mark the GitHub release as a prerelease"
+        description: 'Mark the GitHub release as a prerelease'
         required: false
         default: false
         type: boolean

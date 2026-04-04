@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       dist_tag:
-        description: "npm dist-tag to publish under"
+        description: 'npm dist-tag to publish under'
         required: true
         default: latest
         type: choice
