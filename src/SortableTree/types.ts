@@ -162,6 +162,12 @@ export interface SortableTreeProps<T extends TreeItem = TreeItem> {
    * @returns
    */
   renderItem?: Props<T>['renderItem'];
+
+  /**
+   * Optional DOM container for the drag overlay portal.
+   * Defaults to document.body when omitted.
+   */
+  dragOverlayPortalContainer?: Element | DocumentFragment | null;
 }
 
 /**

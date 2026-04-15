@@ -206,6 +206,7 @@ const BASE_TREE = [
   autoExpandOnHoverDelay={600}
   items={items}
   setItems={setItems}
+  dragOverlayPortalContainer={document.getElementById('app-theme-portal-root')}
   renderItem={(props: RenderItemProps<CustomTreeItem>) => (
     <TreeItem
       {...props}
@@ -219,26 +220,29 @@ const BASE_TREE = [
 
 Use `autoExpandOnHoverDelay` when you want collapsed parents to expand while a user is dragging over a nesting position. This lets people continue navigating deeper into the tree without dropping the item first. The prop is optional, so consumers can decide whether to enable the behavior and how long the hover delay should be.
 
+Use `dragOverlayPortalContainer` when your custom `renderItem` depends on styles or CSS variables from a specific app subtree, such as a Radix `Theme` wrapper. When omitted, the drag overlay is still portaled to `document.body`.
+
 ---
 
 ## Props
 
-| Prop                      | Type                                                            | Default     | Description                                                                                                          |
-| ------------------------- | --------------------------------------------------------------- | ----------- | -------------------------------------------------------------------------------------------------------------------- |
-| `items`                   | `TreeItems<T>`                                                  | Required    | The array of tree items to be rendered.                                                                              |
-| `setItems`                | `(items: TreeItems<T>) => void`                                 | Required    | Callback function called when the tree items array changes.                                                          |
-| `renderItem`              | `(props: RenderItemProps<T>) => React.ReactNode`                | Required    | Function to render each tree item.                                                                                   |
-| `indentationWidth`        | `number`                                                        | `undefined` | The indentation width for children elements.                                                                         |
-| `isCollapsible`           | `boolean`                                                       | `false`     | Determines if tree items can be collapsed/expanded.                                                                  |
-| `onLazyLoadChildren`      | `(id: UniqueIdentifier, isExpanding: boolean) => Promise<void>` | `undefined` | Callback for lazy loading child items when a parent is expanded. Useful for getting child items from an API endpoint |
-| `showDropIndicator`       | `boolean`                                                       | `false`     | Determines if a drop indicator should be shown when dragging items.                                                  |
-| `autoExpandOnHoverDelay`  | `number`                                                        | `undefined` | Automatically expands a collapsed parent after the given hover delay in milliseconds while dragging into it.         |
-| `isRemovable`             | `boolean`                                                       | `false`     | Determines if items can be removed from the tree.                                                                    |
-| `onRemoveItem`            | `(id: UniqueIdentifier) => void`                                | `undefined` | Callback function called when an item is removed from the tree.                                                      |
-| `allowNestedItemAddition` | `boolean`                                                       | `false`     | Determines if new items can be added as children to existing items.                                                  |
-| `onAddItem`               | `(parentId: UniqueIdentifier \| null) => void`                  | `undefined` | Callback function called when a new item is added to the tree.                                                       |
-| `onDragEnd`               | `(result: DropResult) => void`                                  | `undefined` | Callback function called when a drag operation ends.                                                                 |
-| `onItemClick`             | `(id: UniqueIdentifier) => void`                                | `undefined` | Callback function called when an item in the tree is clicked.                                                        |
+| Prop                         | Type                                                            | Default         | Description                                                                                                                        |
+| ---------------------------- | --------------------------------------------------------------- | --------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `items`                      | `TreeItems<T>`                                                  | Required        | The array of tree items to be rendered.                                                                                            |
+| `setItems`                   | `(items: TreeItems<T>) => void`                                 | Required        | Callback function called when the tree items array changes.                                                                        |
+| `renderItem`                 | `(props: RenderItemProps<T>) => React.ReactNode`                | Required        | Function to render each tree item.                                                                                                 |
+| `indentationWidth`           | `number`                                                        | `undefined`     | The indentation width for children elements.                                                                                       |
+| `isCollapsible`              | `boolean`                                                       | `false`         | Determines if tree items can be collapsed/expanded.                                                                                |
+| `onLazyLoadChildren`         | `(id: UniqueIdentifier, isExpanding: boolean) => Promise<void>` | `undefined`     | Callback for lazy loading child items when a parent is expanded. Useful for getting child items from an API endpoint               |
+| `showDropIndicator`          | `boolean`                                                       | `false`         | Determines if a drop indicator should be shown when dragging items.                                                                |
+| `autoExpandOnHoverDelay`     | `number`                                                        | `undefined`     | Automatically expands a collapsed parent after the given hover delay in milliseconds while dragging into it.                       |
+| `isRemovable`                | `boolean`                                                       | `false`         | Determines if items can be removed from the tree.                                                                                  |
+| `onRemoveItem`               | `(id: UniqueIdentifier) => void`                                | `undefined`     | Callback function called when an item is removed from the tree.                                                                    |
+| `allowNestedItemAddition`    | `boolean`                                                       | `false`         | Determines if new items can be added as children to existing items.                                                                |
+| `onAddItem`                  | `(parentId: UniqueIdentifier \| null) => void`                  | `undefined`     | Callback function called when a new item is added to the tree.                                                                     |
+| `onDragEnd`                  | `(result: DropResult) => void`                                  | `undefined`     | Callback function called when a drag operation ends.                                                                               |
+| `onItemClick`                | `(id: UniqueIdentifier) => void`                                | `undefined`     | Callback function called when an item in the tree is clicked.                                                                      |
+| `dragOverlayPortalContainer` | `Element \| DocumentFragment \| null`                           | `document.body` | Optional DOM container for the drag overlay portal. Useful when custom rendered items must stay inside a themed or styled subtree. |
 
 ---
 

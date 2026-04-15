@@ -80,6 +80,7 @@ function PrivateSortableTree<T extends TreeItem = TreeItem>({
   onDragEnd,
   onItemClick,
   renderItem,
+  dragOverlayPortalContainer,
 }: SortableTreeProps<T>) {
   const [activeId, setActiveId] = useState<UniqueIdentifier | null>(null);
   const [overId, setOverId] = useState<UniqueIdentifier | null>(null);
@@ -486,7 +487,7 @@ function PrivateSortableTree<T extends TreeItem = TreeItem>({
                 />
               ) : null}
             </DragOverlay>,
-            document.body,
+            dragOverlayPortalContainer ?? document.body,
           )}
         </SortableContext>
       </DndContext>
