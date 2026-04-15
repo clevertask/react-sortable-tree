@@ -206,6 +206,7 @@ const BASE_TREE = [
   autoExpandOnHoverDelay={600}
   items={items}
   setItems={setItems}
+  dragOverlayPortalContainer={document.getElementById('app-theme-portal-root')}
   renderItem={(props: RenderItemProps<CustomTreeItem>) => (
     <TreeItem
       {...props}
@@ -218,6 +219,8 @@ const BASE_TREE = [
 ```
 
 Use `autoExpandOnHoverDelay` when you want collapsed parents to expand while a user is dragging over a nesting position. This lets people continue navigating deeper into the tree without dropping the item first. The prop is optional, so consumers can decide whether to enable the behavior and how long the hover delay should be.
+
+Use `dragOverlayPortalContainer` when your custom `renderItem` depends on styles or CSS variables from a specific app subtree, such as a Radix `Theme` wrapper. When omitted, the drag overlay is still portaled to `document.body`.
 
 ---
 
@@ -239,6 +242,7 @@ Use `autoExpandOnHoverDelay` when you want collapsed parents to expand while a u
 | `onAddItem`               | `(parentId: UniqueIdentifier \| null) => void`                  | `undefined` | Callback function called when a new item is added to the tree.                                                       |
 | `onDragEnd`               | `(result: DropResult) => void`                                  | `undefined` | Callback function called when a drag operation ends.                                                                 |
 | `onItemClick`             | `(id: UniqueIdentifier) => void`                                | `undefined` | Callback function called when an item in the tree is clicked.                                                        |
+| `dragOverlayPortalContainer` | `Element \| DocumentFragment \| null`                        | `document.body` | Optional DOM container for the drag overlay portal. Useful when custom rendered items must stay inside a themed or styled subtree. |
 
 ---
 
