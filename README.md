@@ -10,6 +10,7 @@ This library is currently focused on **custom item rendering** and **type-safe t
 
 - [Installation](#installation)
 - [Usage](#usage)
+- [Experimental Drag Activation Constraints](#experimental-drag-activation-constraints)
 - [Props](#props)
 - [Types](#types)
 - [Helper Functions](#helper-functions)
@@ -224,6 +225,44 @@ Use `dragOverlayPortalContainer` when your custom `renderItem` depends on styles
 
 ---
 
+## Experimental Drag Activation Constraints
+
+`dragActivationConstraints` lets consumers tune when mouse and touch drags become active. The defaults are tuned to reduce accidental drag activation while scrolling on touch devices:
+
+```ts
+{
+  mouse: { distance: 6 },
+  touch: { delay: 220, tolerance: 8 },
+}
+```
+
+The prop is optional. If `mouse` or `touch` is omitted, the default for that input type is used. Pass `null` to disable a default constraint, or pass a dnd-kit activation constraint object to override it.
+
+```tsx
+<SortableTree
+  items={items}
+  setItems={setItems}
+  dragActivationConstraints={{
+    mouse: { distance: 8 },
+    touch: { delay: 260, tolerance: 10 },
+  }}
+/>
+```
+
+```tsx
+<SortableTree
+  items={items}
+  setItems={setItems}
+  dragActivationConstraints={{
+    mouse: null,
+  }}
+/>
+```
+
+This API is experimental while the package still uses the legacy `@dnd-kit/core` sensor API. It may be refined if the package migrates to the modern dnd-kit PointerSensor API.
+
+---
+
 ## Props
 
 | Prop                         | Type                                                            | Default         | Description                                                                                                                        |
@@ -243,6 +282,7 @@ Use `dragOverlayPortalContainer` when your custom `renderItem` depends on styles
 | `onDragEnd`                  | `(result: DropResult) => void`                                  | `undefined`     | Callback function called when a drag operation ends.                                                                               |
 | `onItemClick`                | `(id: UniqueIdentifier) => void`                                | `undefined`     | Callback function called when an item in the tree is clicked.                                                                      |
 | `dragOverlayPortalContainer` | `Element \| DocumentFragment \| null`                           | `document.body` | Optional DOM container for the drag overlay portal. Useful when custom rendered items must stay inside a themed or styled subtree. |
+| `dragActivationConstraints`  | `{ mouse?: MouseSensorOptions['activationConstraint'] \| null; touch?: TouchSensorOptions['activationConstraint'] \| null; }` | See above       | Experimental drag activation constraints for mouse and touch sensors. Omit an input type to use its default, pass `null` to disable its default, or pass a constraint object to override it. |
 
 ---
 
