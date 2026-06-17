@@ -20,6 +20,7 @@ jobs:
         run: pnpm run fmt:check
 
       - name: Install Playwright Browsers
+        timeout-minutes: 10
         run: pnpm exec playwright install --with-deps
 
       - name: Run Playwright tests

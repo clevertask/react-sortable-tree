@@ -1,5 +1,5 @@
 import type { MutableRefObject } from 'react';
-import type { UniqueIdentifier } from '@dnd-kit/core';
+import type { MouseSensorOptions, TouchSensorOptions, UniqueIdentifier } from '@dnd-kit/core';
 import { Props } from './components/TreeItem/TreeItem';
 
 /**
@@ -72,6 +72,18 @@ export type SensorContext = MutableRefObject<{
   items: FlattenedItem[];
   offset: number;
 }>;
+
+export type SortableTreeDragActivationConstraints = {
+  /**
+   * Mouse activation constraint. Use null to disable the default mouse constraint.
+   */
+  mouse?: MouseSensorOptions['activationConstraint'] | null;
+
+  /**
+   * Touch activation constraint. Use null to disable the default touch constraint.
+   */
+  touch?: TouchSensorOptions['activationConstraint'] | null;
+};
 
 /**
  * Props for the SortableTree component.
@@ -168,6 +180,13 @@ export interface SortableTreeProps<T extends TreeItem = TreeItem> {
    * Defaults to document.body when omitted.
    */
   dragOverlayPortalContainer?: Element | DocumentFragment | null;
+
+  /**
+   * Optional drag activation constraints for pointer-based sensors.
+   * Defaults to a small mouse distance and a short touch hold so scroll gestures do not
+   * accidentally start a drag.
+   */
+  dragActivationConstraints?: SortableTreeDragActivationConstraints;
 }
 
 /**

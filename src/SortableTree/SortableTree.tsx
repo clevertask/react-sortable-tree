@@ -5,7 +5,9 @@ import {
   DndContext,
   closestCenter,
   KeyboardSensor,
-  PointerSensor,
+  KeyboardCoordinateGetter,
+  MouseSensor,
+  TouchSensor,
   useSensor,
   useSensors,
   DragStartEvent,
@@ -31,7 +33,14 @@ import {
   removeChildrenOf,
   setTreeItemProperties,
 } from './utilities';
-import type { FlattenedItem, SensorContext, SortableTreeProps, TreeItem, TreeItems } from './types';
+import type {
+  FlattenedItem,
+  SensorContext,
+  SortableTreeDragActivationConstraints,
+  SortableTreeProps,
+  TreeItem,
+  TreeItems,
+} from './types';
 import { sortableTreeKeyboardCoordinates } from './keyboardCoordinates';
 import { SortableTreeItem } from './components';
 import { CSS } from '@dnd-kit/utilities';
@@ -41,6 +50,11 @@ const measuring = {
     strategy: MeasuringStrategy.Always,
   },
 };
+
+const defaultDragActivationConstraints = {
+  mouse: { distance: 6 },
+  touch: { delay: 220, tolerance: 8 },
+} satisfies Required<SortableTreeDragActivationConstraints>;
 
 const dropAnimationConfig: DropAnimation = {
   keyframes({ transform }) {
@@ -81,6 +95,7 @@ function PrivateSortableTree<T extends TreeItem = TreeItem>({
   onItemClick,
   renderItem,
   dragOverlayPortalContainer,
+  dragActivationConstraints,
 }: SortableTreeProps<T>) {
   const [activeId, setActiveId] = useState<UniqueIdentifier | null>(null);
   const [overId, setOverId] = useState<UniqueIdentifier | null>(null);
@@ -139,12 +154,33 @@ function PrivateSortableTree<T extends TreeItem = TreeItem>({
     offset: offsetLeft,
   });
 
-  const [coordinateGetter] = useState(() =>
-    sortableTreeKeyboardCoordinates(sensorContext, showDropIndicator, indentationWidth),
+  const coordinateGetter = useCallback<KeyboardCoordinateGetter>(
+    (event, keyboardContext) =>
+      sortableTreeKeyboardCoordinates(
+        sensorContext.current,
+        showDropIndicator,
+        indentationWidth,
+        event,
+        keyboardContext,
+      ),
+    [indentationWidth, showDropIndicator],
   );
+  const resolvedMouseActivationConstraint =
+    dragActivationConstraints?.mouse === undefined
+      ? defaultDragActivationConstraints.mouse
+      : dragActivationConstraints.mouse;
+  const resolvedTouchActivationConstraint =
+    dragActivationConstraints?.touch === undefined
+      ? defaultDragActivationConstraints.touch
+      : dragActivationConstraints.touch;
 
   const sensors = useSensors(
-    useSensor(PointerSensor),
+    useSensor(MouseSensor, {
+      activationConstraint: resolvedMouseActivationConstraint ?? undefined,
+    }),
+    useSensor(TouchSensor, {
+      activationConstraint: resolvedTouchActivationConstraint ?? undefined,
+    }),
     useSensor(KeyboardSensor, {
       coordinateGetter,
     }),
