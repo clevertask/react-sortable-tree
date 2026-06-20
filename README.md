@@ -1,6 +1,6 @@
 # @clevertask/react-sortable-tree
 
-A customizable React component for rendering and managing tree structures with drag-and-drop functionality. Built on top of the [dnd-kit sortable tree example](https://github.com/clauderic/dnd-kit/blob/master/stories/3%20-%20Examples/Tree/SortableTree.tsx).
+A customizable React component for rendering and managing tree structures with drag-and-drop functionality. Built on top of the [dnd-kit sortable tree example](https://github.com/clauderic/dnd-kit/tree/main/apps/stories/stories/react/Sortable/Tree).
 
 This library is currently focused on **custom item rendering** and **type-safe tree structures**. A more detailed API and feature set will be released in a future major version with support for virtualization and multi-selection.
 
@@ -227,16 +227,25 @@ Use `dragOverlayPortalContainer` when your custom `renderItem` depends on styles
 
 ## Experimental Drag Activation Constraints
 
-`dragActivationConstraints` lets consumers tune when mouse and touch drags become active. The defaults are tuned to reduce accidental drag activation while scrolling on touch devices:
+`dragActivationConstraints` lets consumers tune when pointer drags become active. The defaults are tuned to reduce accidental drag activation while scrolling on touch devices:
 
 ```ts
 {
   mouse: { distance: 6 },
   touch: { delay: 220, tolerance: 8 },
+  pen: { distance: 6 },
 }
 ```
 
-The prop is optional. If `mouse` or `touch` is omitted, the default for that input type is used. Pass `null` to disable a default constraint, or pass a dnd-kit activation constraint object to override it.
+The prop is optional. If `mouse`, `touch`, or `pen` is omitted, the default for that input type is used. Pass `null` to disable a default constraint, or pass a constraint object to override it.
+
+```ts
+type SortableTreeActivationConstraint = {
+  distance?: number;
+  delay?: number;
+  tolerance?: number | { x: number; y: number } | { x: number } | { y: number };
+};
+```
 
 ```tsx
 <SortableTree
@@ -259,30 +268,30 @@ The prop is optional. If `mouse` or `touch` is omitted, the default for that inp
 />
 ```
 
-This API is experimental while the package still uses the legacy `@dnd-kit/core` sensor API. It may be refined if the package migrates to the modern dnd-kit PointerSensor API.
+Internally, the tree uses the modern dnd-kit `PointerSensor`. The public option remains grouped by pointer type so consumers can tune mouse, touch, and pen activation independently while keeping keyboard dragging unchanged.
 
 ---
 
 ## Props
 
-| Prop                         | Type                                                                                                                          | Default         | Description                                                                                                                                                                                  |
-| ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------- | --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `items`                      | `TreeItems<T>`                                                                                                                | Required        | The array of tree items to be rendered.                                                                                                                                                      |
-| `setItems`                   | `(items: TreeItems<T>) => void`                                                                                               | Required        | Callback function called when the tree items array changes.                                                                                                                                  |
-| `renderItem`                 | `(props: RenderItemProps<T>) => React.ReactNode`                                                                              | Required        | Function to render each tree item.                                                                                                                                                           |
-| `indentationWidth`           | `number`                                                                                                                      | `undefined`     | The indentation width for children elements.                                                                                                                                                 |
-| `isCollapsible`              | `boolean`                                                                                                                     | `false`         | Determines if tree items can be collapsed/expanded.                                                                                                                                          |
-| `onLazyLoadChildren`         | `(id: UniqueIdentifier, isExpanding: boolean) => Promise<void>`                                                               | `undefined`     | Callback for lazy loading child items when a parent is expanded. Useful for getting child items from an API endpoint                                                                         |
-| `showDropIndicator`          | `boolean`                                                                                                                     | `false`         | Determines if a drop indicator should be shown when dragging items.                                                                                                                          |
-| `autoExpandOnHoverDelay`     | `number`                                                                                                                      | `undefined`     | Automatically expands a collapsed parent after the given hover delay in milliseconds while dragging into it.                                                                                 |
-| `isRemovable`                | `boolean`                                                                                                                     | `false`         | Determines if items can be removed from the tree.                                                                                                                                            |
-| `onRemoveItem`               | `(id: UniqueIdentifier) => void`                                                                                              | `undefined`     | Callback function called when an item is removed from the tree.                                                                                                                              |
-| `allowNestedItemAddition`    | `boolean`                                                                                                                     | `false`         | Determines if new items can be added as children to existing items.                                                                                                                          |
-| `onAddItem`                  | `(parentId: UniqueIdentifier \| null) => void`                                                                                | `undefined`     | Callback function called when a new item is added to the tree.                                                                                                                               |
-| `onDragEnd`                  | `(result: DropResult) => void`                                                                                                | `undefined`     | Callback function called when a drag operation ends.                                                                                                                                         |
-| `onItemClick`                | `(id: UniqueIdentifier) => void`                                                                                              | `undefined`     | Callback function called when an item in the tree is clicked.                                                                                                                                |
-| `dragOverlayPortalContainer` | `Element \| DocumentFragment \| null`                                                                                         | `document.body` | Optional DOM container for the drag overlay portal. Useful when custom rendered items must stay inside a themed or styled subtree.                                                           |
-| `dragActivationConstraints`  | `{ mouse?: MouseSensorOptions['activationConstraint'] \| null; touch?: TouchSensorOptions['activationConstraint'] \| null; }` | See above       | Experimental drag activation constraints for mouse and touch sensors. Omit an input type to use its default, pass `null` to disable its default, or pass a constraint object to override it. |
+| Prop                         | Type                                                                                                                                                      | Default         | Description                                                                                                                                                                                |
+| ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `items`                      | `TreeItems<T>`                                                                                                                                            | Required        | The array of tree items to be rendered.                                                                                                                                                    |
+| `setItems`                   | `(items: TreeItems<T>) => void`                                                                                                                           | Required        | Callback function called when the tree items array changes.                                                                                                                                |
+| `renderItem`                 | `(props: RenderItemProps<T>) => React.ReactNode`                                                                                                          | Required        | Function to render each tree item.                                                                                                                                                         |
+| `indentationWidth`           | `number`                                                                                                                                                  | `undefined`     | The indentation width for children elements.                                                                                                                                               |
+| `isCollapsible`              | `boolean`                                                                                                                                                 | `false`         | Determines if tree items can be collapsed/expanded.                                                                                                                                        |
+| `onLazyLoadChildren`         | `(id: UniqueIdentifier, isExpanding: boolean) => Promise<void>`                                                                                           | `undefined`     | Callback for lazy loading child items when a parent is expanded. Useful for getting child items from an API endpoint                                                                       |
+| `showDropIndicator`          | `boolean`                                                                                                                                                 | `false`         | Determines if a drop indicator should be shown when dragging items.                                                                                                                        |
+| `autoExpandOnHoverDelay`     | `number`                                                                                                                                                  | `undefined`     | Automatically expands a collapsed parent after the given hover delay in milliseconds while dragging into it.                                                                               |
+| `isRemovable`                | `boolean`                                                                                                                                                 | `false`         | Determines if items can be removed from the tree.                                                                                                                                          |
+| `onRemoveItem`               | `(id: UniqueIdentifier) => void`                                                                                                                          | `undefined`     | Callback function called when an item is removed from the tree.                                                                                                                            |
+| `allowNestedItemAddition`    | `boolean`                                                                                                                                                 | `false`         | Determines if new items can be added as children to existing items.                                                                                                                        |
+| `onAddItem`                  | `(parentId: UniqueIdentifier \| null) => void`                                                                                                            | `undefined`     | Callback function called when a new item is added to the tree.                                                                                                                             |
+| `onDragEnd`                  | `(result: DropResult) => void`                                                                                                                            | `undefined`     | Callback function called when a drag operation ends.                                                                                                                                       |
+| `onItemClick`                | `(id: UniqueIdentifier) => void`                                                                                                                          | `undefined`     | Callback function called when an item in the tree is clicked.                                                                                                                              |
+| `dragOverlayPortalContainer` | `Element \| DocumentFragment \| null`                                                                                                                     | `document.body` | Optional DOM container for the drag overlay portal. Useful when custom rendered items must stay inside a themed or styled subtree.                                                         |
+| `dragActivationConstraints`  | `{ mouse?: SortableTreeActivationConstraint \| null; touch?: SortableTreeActivationConstraint \| null; pen?: SortableTreeActivationConstraint \| null; }` | See above       | Experimental drag activation constraints for pointer-based sensors. Omit an input type to use its default, pass `null` to disable its default, or pass a constraint object to override it. |
 
 ---
 

@@ -1,5 +1,5 @@
 import type { MutableRefObject } from 'react';
-import type { MouseSensorOptions, TouchSensorOptions, UniqueIdentifier } from '@dnd-kit/core';
+import type { UniqueIdentifier } from '@dnd-kit/abstract';
 import { Props } from './components/TreeItem/TreeItem';
 
 /**
@@ -73,16 +73,40 @@ export type SensorContext = MutableRefObject<{
   offset: number;
 }>;
 
+type DistanceMeasurement = number | { x: number; y: number } | { x: number } | { y: number };
+
+export type SortableTreeActivationConstraint = {
+  /**
+   * Distance the pointer must move before drag activation.
+   */
+  distance?: number;
+
+  /**
+   * Delay in milliseconds before drag activation.
+   */
+  delay?: number;
+
+  /**
+   * Movement allowed before a pending distance or delay activation is cancelled.
+   */
+  tolerance?: DistanceMeasurement;
+};
+
 export type SortableTreeDragActivationConstraints = {
   /**
    * Mouse activation constraint. Use null to disable the default mouse constraint.
    */
-  mouse?: MouseSensorOptions['activationConstraint'] | null;
+  mouse?: SortableTreeActivationConstraint | null;
 
   /**
    * Touch activation constraint. Use null to disable the default touch constraint.
    */
-  touch?: TouchSensorOptions['activationConstraint'] | null;
+  touch?: SortableTreeActivationConstraint | null;
+
+  /**
+   * Pen activation constraint. Uses the mouse constraint when omitted.
+   */
+  pen?: SortableTreeActivationConstraint | null;
 };
 
 /**
@@ -242,4 +266,4 @@ export type MoveTreeItemsResult<T extends TreeItem = TreeItem> = {
   movedItemIds: UniqueIdentifier[];
 };
 
-export type { UniqueIdentifier } from '@dnd-kit/core';
+export type { UniqueIdentifier } from '@dnd-kit/abstract';

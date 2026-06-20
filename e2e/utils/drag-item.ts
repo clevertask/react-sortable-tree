@@ -92,7 +92,7 @@ async function getDragCoordinates(
 }
 
 export async function dragItem({ page, expect, from, to, beforeDrop }: DragItemOptions) {
-  const fromHandle = page.getByLabel(`Drag ${from.name}`, { exact: true });
+  const fromHandle = page.locator(`[data-tree-drag-handle][aria-label="Drag ${from.name}"]`);
 
   await expect(fromHandle).toBeVisible();
 
