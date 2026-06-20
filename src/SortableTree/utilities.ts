@@ -1,5 +1,5 @@
-import type { UniqueIdentifier } from '@dnd-kit/core';
-import { arrayMove } from '@dnd-kit/sortable';
+import type { UniqueIdentifier } from '@dnd-kit/abstract';
+import { arrayMove } from '@dnd-kit/helpers';
 
 import type {
   DropResult,
@@ -14,8 +14,51 @@ import type {
 
 export const iOS = /iPad|iPhone|iPod/.test(navigator.platform);
 
-function getDragDepth(offset: number, indentationWidth: number) {
+export function getDragDepth(offset: number, indentationWidth: number) {
   return Math.round(offset / indentationWidth);
+}
+
+export function getProjectionFromDepth(
+  items: FlattenedItem[],
+  targetId: UniqueIdentifier,
+  projectedDepth: number,
+) {
+  const targetItemIndex = items.findIndex(({ id }) => id === targetId);
+  const previousItem = items[targetItemIndex - 1];
+  const targetItem = items[targetItemIndex];
+  const nextItem = items[targetItemIndex + 1];
+  const maxDepth = getMaxDepth(targetItem, previousItem);
+  const minDepth = getMinDepth({ nextItem });
+  let depth = projectedDepth;
+
+  if (projectedDepth >= maxDepth) {
+    depth = maxDepth;
+  } else if (projectedDepth < minDepth) {
+    depth = minDepth;
+  }
+
+  return { depth, maxDepth, minDepth, parentId: getParentId() };
+
+  function getParentId() {
+    if (depth === 0 || !previousItem) {
+      return null;
+    }
+
+    if (depth === previousItem.depth) {
+      return previousItem.parentId;
+    }
+
+    if (depth > previousItem.depth) {
+      return previousItem.id;
+    }
+
+    const newParent = items
+      .slice(0, targetItemIndex)
+      .reverse()
+      .find((item) => item.depth === depth)?.parentId;
+
+    return newParent ?? null;
+  }
 }
 
 export function getProjection(
@@ -30,12 +73,11 @@ export function getProjection(
   const activeItem = items[activeItemIndex];
   const newItems = arrayMove(items, activeItemIndex, overItemIndex);
   const previousItem = newItems[overItemIndex - 1];
+  const targetItem = newItems[overItemIndex];
   const nextItem = newItems[overItemIndex + 1];
   const dragDepth = getDragDepth(dragOffset, indentationWidth);
   const projectedDepth = activeItem.depth + dragDepth;
-  const maxDepth = getMaxDepth({
-    previousItem,
-  });
+  const maxDepth = getMaxDepth(targetItem, previousItem);
   const minDepth = getMinDepth({ nextItem });
   let depth = projectedDepth;
 
@@ -69,9 +111,12 @@ export function getProjection(
   }
 }
 
-function getMaxDepth({ previousItem }: { previousItem: FlattenedItem }) {
-  if (previousItem) {
-    return previousItem.depth + 1;
+function getMaxDepth(
+  targetItem: FlattenedItem | undefined,
+  previousItem: FlattenedItem | undefined,
+) {
+  if (targetItem && previousItem) {
+    return Math.min(targetItem.depth + 1, previousItem.depth + 1);
   }
 
   return 0;
@@ -178,7 +223,7 @@ function getEffectiveMovedItemIds<T extends TreeItem>(
   );
 }
 
-function getDescendantIds<T extends TreeItem>(
+export function getDescendantIds<T extends TreeItem>(
   items: TreeItems<T>,
   parentIds: UniqueIdentifier[],
 ): Set<UniqueIdentifier> {
@@ -256,7 +301,7 @@ function flattenLegacyTree<T extends TreeItem>(
   return items.reduce<FlattenedItem<T>[]>((acc, item, index) => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { children, parentId: _ignoredParentId, ...rest } = item;
-    acc.push({ ...rest, parentId, depth, index });
+    acc.push({ ...rest, parentId, depth, index } as FlattenedItem<T>);
     acc.push(...flattenLegacyTree(children, item.id, depth + 1));
     return acc;
   }, []);

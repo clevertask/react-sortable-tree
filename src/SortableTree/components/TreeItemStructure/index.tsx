@@ -1,6 +1,6 @@
-import { TreeItem, UniqueIdentifier } from '../../types';
-import { RenderItemProps } from '../TreeItem/TreeItem';
 import React, { createContext } from 'react';
+import type { TreeItem, UniqueIdentifier } from '../../types';
+import type { RenderItemProps } from '../TreeItem/TreeItem';
 
 type AriaProps = {
   'aria-label'?: string;
@@ -11,7 +11,7 @@ type AriaProps = {
 export type TreeItemStructureProps = {
   treeItem: TreeItem & { parentId?: UniqueIdentifier | null };
   dropZoneRef: (element: HTMLElement | null) => void;
-  draggableItemRef: React.Ref<any>;
+  draggableItemRef: React.Ref<Element>;
   dropZoneStyle?: React.CSSProperties;
   draggableItemStyle?: React.CSSProperties;
   classNames?: {
@@ -29,7 +29,7 @@ export type TreeItemStructureProps = {
 } & Pick<RenderItemProps, 'dragListeners'>;
 
 const DragContext = createContext<{
-  dragListeners?: Record<string, any>;
+  dragListeners?: RenderItemProps['dragListeners'];
   label?: string;
 } | null>(null);
 
@@ -98,7 +98,7 @@ TreeItemStructure.DragHandler = function DragHandler({
   const ctx = React.useContext(DragContext);
 
   if (!ctx) {
-    if (process.env.NODE_ENV !== 'production') {
+    if (import.meta.env.DEV) {
       throw new Error('TreeItemStructure.DragHandler must be used inside TreeItemStructure');
     }
     return null;
