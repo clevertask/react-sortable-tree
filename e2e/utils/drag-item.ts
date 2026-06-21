@@ -8,6 +8,7 @@ interface DragTarget {
   name: string;
   position: DragPosition;
   horizontalOffset?: number;
+  verticalOffset?: number;
 }
 
 interface DragItemOptions {
@@ -85,7 +86,11 @@ async function getDragCoordinates(
   }
 
   if (target.horizontalOffset != null) {
-    endX = Math.min(targetBox.x + targetBox.width - 8, targetBox.x + target.horizontalOffset);
+    endX = targetBox.x + target.horizontalOffset;
+  }
+
+  if (target.verticalOffset != null) {
+    endY = targetBox.y + target.verticalOffset;
   }
 
   return { endX, endY };
@@ -119,6 +124,8 @@ export async function dragItem({ page, expect, from, to, beforeDrop }: DragItemO
 
   if (beforeDrop) {
     await page.waitForTimeout(120);
+    await page.mouse.move(endX + 1, endY + 1);
+    await page.mouse.move(endX, endY);
   }
 
   if (beforeDrop?.waitMs) {
@@ -139,6 +146,7 @@ export async function dragItem({ page, expect, from, to, beforeDrop }: DragItemO
   await page.evaluate(() => new Promise(requestAnimationFrame));
   await page.waitForTimeout(120);
   await page.mouse.up();
+  await page.mouse.move(0, 0);
   await page.waitForTimeout(120);
   await expect(fromHandle).toHaveCount(1);
 }
