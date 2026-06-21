@@ -7,10 +7,6 @@ import {
   getTreeItem,
 } from './utils';
 
-test.afterEach(async ({ page }) => {
-  await page.reload();
-});
-
 test('Item D becomes a child of C after drag and drop', async ({ page }) => {
   await page.goto('/');
 
@@ -42,7 +38,7 @@ test('Collapsed parents auto-expand when dragging indicates nesting into them', 
       run: async ({ page, expect }) => {
         await expect(getTreeItem(page, 'Z')).toHaveCount(1);
       },
-      continueTo: { name: 'Z', position: 'before' },
+      continueTo: { name: 'Z', position: 'before', horizontalOffset: 80 },
     },
   });
 
@@ -177,7 +173,7 @@ test('Last item E can be moved before first item A', async ({ page }) => {
     page,
     expect,
     from: { name: 'E' },
-    to: { name: 'A', position: 'before' },
+    to: { name: 'A', position: 'before', verticalOffset: 4 },
   });
 
   await expectItemBefore(page, expect, 'E', 'A');
