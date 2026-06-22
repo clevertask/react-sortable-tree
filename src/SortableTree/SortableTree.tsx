@@ -27,7 +27,6 @@ import {
 } from './utilities';
 import type {
   FlattenedItem,
-  SortableTreeActivationConstraint,
   SortableTreeDragActivationConstraints,
   SortableTreeProps,
   TreeItem,
@@ -35,11 +34,6 @@ import type {
 } from './types';
 import { SortableTreeItem, TreeItem as TreeItemComponent } from './components';
 
-const defaultDragActivationConstraints = {
-  mouse: { distance: 6 },
-  touch: { delay: 220, tolerance: 8 },
-  pen: { distance: 6 },
-} satisfies Required<SortableTreeDragActivationConstraints>;
 const TREE_ITEM_DROP_EDGE_TOLERANCE = 8;
 
 type ProjectedTreePosition = {
@@ -52,9 +46,7 @@ function getConstraintForPointerType(
   dragActivationConstraints: SortableTreeDragActivationConstraints | undefined,
 ) {
   if (pointerType === 'touch') {
-    return dragActivationConstraints?.touch === undefined
-      ? defaultDragActivationConstraints.touch
-      : dragActivationConstraints.touch;
+    return dragActivationConstraints?.touch;
   }
 
   if (pointerType === 'pen') {
@@ -62,20 +54,16 @@ function getConstraintForPointerType(
       return dragActivationConstraints.pen;
     }
 
-    return dragActivationConstraints?.mouse === undefined
-      ? defaultDragActivationConstraints.pen
-      : dragActivationConstraints.mouse;
+    return dragActivationConstraints?.mouse;
   }
 
-  return dragActivationConstraints?.mouse === undefined
-    ? defaultDragActivationConstraints.mouse
-    : dragActivationConstraints.mouse;
+  return dragActivationConstraints?.mouse;
 }
 
 function toPointerActivationConstraints(
-  constraint: SortableTreeActivationConstraint | null,
+  constraint: SortableTreeDragActivationConstraints[keyof SortableTreeDragActivationConstraints],
 ): ActivationConstraints<PointerEvent> {
-  if (constraint === null) {
+  if (constraint == null) {
     return [];
   }
 
@@ -322,22 +310,24 @@ function PrivateSortableTree<T extends TreeItem = TreeItem>({
   const renderedItems = dragItems ?? flattenedItems;
   const activeItem = activeId ? flatItems.find(({ id }) => id === activeId) : null;
 
-  const pointerSensors = useMemo(
-    () =>
-      (defaultSensors: Sensors<DragDropManager>): Sensors<DragDropManager> => [
-        ...defaultSensors.filter((sensor) => sensor !== PointerSensor),
-        PointerSensor.configure({
-          activationConstraints(event) {
-            const constraint = getConstraintForPointerType(
-              event.pointerType,
-              dragActivationConstraints,
-            );
-            return toPointerActivationConstraints(constraint);
-          },
-        }),
-      ],
-    [dragActivationConstraints],
-  );
+  const pointerSensors = useMemo(() => {
+    if (dragActivationConstraints === undefined) {
+      return undefined;
+    }
+
+    return (defaultSensors: Sensors<DragDropManager>): Sensors<DragDropManager> => [
+      ...defaultSensors.filter((sensor) => sensor !== PointerSensor),
+      PointerSensor.configure({
+        activationConstraints(event) {
+          const constraint = getConstraintForPointerType(
+            event.pointerType,
+            dragActivationConstraints,
+          );
+          return toPointerActivationConstraints(constraint);
+        },
+      }),
+    ];
+  }, [dragActivationConstraints]);
 
   const setTreeItems = useCallback(
     (nextItems: TreeItems<T> | ((items: TreeItems<T>) => TreeItems<T>)) => {
