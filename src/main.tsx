@@ -18,7 +18,12 @@ import {
   TreeItemStructure,
 } from './index';
 import { RenderItemProps } from './SortableTree/components/TreeItem/TreeItem';
-import type { DropResult, MoveTreeItemResult, MoveTreeItemsResult } from './index';
+import type {
+  DropResult,
+  MoveTreeItemResult,
+  MoveTreeItemsResult,
+  SortableTreeDragActivationConstraints,
+} from './index';
 
 type CustomTreeItem = TreeItem<{
   icon?: string;
@@ -40,9 +45,16 @@ const BASE_TREE: MyTreeItem = [
   { id: 'e', label: 'E', parentId: null },
 ];
 
+const DEMO_DRAG_ACTIVATION_CONSTRAINTS = {
+  mouse: { distance: 6 },
+  touch: { delay: 220, tolerance: 8 },
+  pen: { distance: 6 },
+} satisfies SortableTreeDragActivationConstraints;
+
 const App = () => {
   const [treeItems, setTreeItems] = useState<MyTreeItem>(BASE_TREE);
   const [lastMoveResult, setLastMoveResult] = useState<LastMoveResult>(null);
+  const [useDragActivationConstraints, setUseDragActivationConstraints] = useState(false);
 
   const runProgrammaticMove = (moveFn: (items: MyTreeItem) => ProgrammaticMoveResult) => {
     setTreeItems((currentItems) => {
@@ -151,6 +163,12 @@ const App = () => {
         >
           Reset tree
         </button>
+        <button
+          onClick={() => setUseDragActivationConstraints((isEnabled) => !isEnabled)}
+          aria-pressed={useDragActivationConstraints}
+        >
+          Toggle drag activation constraints
+        </button>
       </div>
 
       <pre style={{ margin: 0, padding: 12, border: '1px solid #ddd' }}>
@@ -163,6 +181,9 @@ const App = () => {
         isCollapsible
         showDropIndicator
         autoExpandOnHoverDelay={600}
+        dragActivationConstraints={
+          useDragActivationConstraints ? DEMO_DRAG_ACTIVATION_CONSTRAINTS : undefined
+        }
         items={treeItems}
         setItems={setTreeItems}
         renderItem={MyCustomTreeItem}
