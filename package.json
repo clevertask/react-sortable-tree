@@ -44,23 +44,23 @@
     "validate:deps": "pnpm run fmt:check && pnpm run lint && pnpm run e2e:install && pnpm run e2e"
   },
   "dependencies": {
-    "@dnd-kit/abstract": "0.5.1",
-    "@dnd-kit/dom": "0.5.1",
-    "@dnd-kit/helpers": "0.5.1",
-    "@dnd-kit/react": "0.5.1",
+    "@dnd-kit/abstract": "0.5.3",
+    "@dnd-kit/dom": "0.5.3",
+    "@dnd-kit/helpers": "0.5.3",
+    "@dnd-kit/react": "0.5.3",
     "@griffel/react": "^1.7.8",
     "classnames": "^2.5.1"
   },
   "devDependencies": {
     "@playwright/test": "^1.64.1",
-    "@types/node": "^24.19.2",
+    "@types/node": "^26.6.6",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "^6.1.2",
     "husky": "^9.1.7",
     "lint-staged": "^17.6.0",
-    "oxfmt": "^0.74.0",
-    "oxlint": "^1.89.0",
+    "oxfmt": "^0.75.0",
+    "oxlint": "^1.90.0",
     "typescript": "~7.0.2",
     "vite": "^8.3.5"
   },
