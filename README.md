@@ -14,6 +14,7 @@ This library is currently focused on **custom item rendering** and **type-safe t
 - [Props](#props)
 - [Types](#types)
 - [Helper Functions](#helper-functions)
+- [Dependency maintenance](#dependency-maintenance)
 - [Roadmap](#roadmap)
 - [License](#license)
 
@@ -585,6 +586,18 @@ This helper tells you if an item is before the "x" item. You don't need a functi
 ```ts
 await expectItemBefore(page, expect, 'C', 'A');
 ```
+
+---
+
+## Dependency maintenance
+
+Dependency updates are reviewed and prepared by an agent rather than a scheduled PR generator. Use the Node LTS selected by `.nvmrc` and the exact pnpm version in `packageManager`. Keep `@types/node` on that runtime's major and check its newest eligible patch manually; the generic updater deliberately ignores it.
+
+Review stable releases, including major changes, against the three-day `minimumReleaseAge` policy in `pnpm-workspace.yaml`. Preserve the build allowlist and React peer support range, and check upstream changes before removing compatibility code.
+
+For each update, run `pnpm install --frozen-lockfile` and `pnpm run validate:deps`. The latter checks formatting and lint, installs the browser test dependencies, builds the package, tests the packed package in Chromium, Firefox, and WebKit, and builds its consumer. Run `pnpm audit` and `pnpm audit --prod` separately and compare findings with the baseline. Describe held-back versions, test skips, and release prerequisites in the PR.
+
+The Playwright CI, release and publish workflows, and Dependabot's GitHub Actions updates remain in place. A dependency PR does not publish the library; downstream consumers need a separately authorized release before adopting package changes.
 
 ---
 
