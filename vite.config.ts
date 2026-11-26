@@ -1,13 +1,9 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
-import { fileURLToPath } from 'node:url';
-import { dirname, resolve } from 'node:path';
+import { resolve } from 'node:path';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-const consumerRoot = resolve(__dirname, 'e2e/consumer');
+const consumerRoot = resolve(import.meta.dirname, 'e2e/consumer');
 
 // https://vite.dev/config/
 export default defineConfig(({ command, isPreview }) => {
@@ -21,7 +17,7 @@ export default defineConfig(({ command, isPreview }) => {
           alias: [
             {
               find: /^@clevertask\/react-sortable-tree$/,
-              replacement: resolve(__dirname, 'src/index.ts'),
+              replacement: resolve(import.meta.dirname, 'src/index.ts'),
             },
           ],
           dedupe: ['react', 'react-dom'],
@@ -29,7 +25,7 @@ export default defineConfig(({ command, isPreview }) => {
       : undefined,
     build: {
       lib: {
-        entry: resolve(__dirname, 'src/index.ts'),
+        entry: resolve(import.meta.dirname, 'src/index.ts'),
         formats: ['es'],
       },
       rollupOptions: {
